@@ -1,16 +1,35 @@
 # /restaurant — Claude Code Skill
 
-A restaurant recommendation skill for Claude Code. Finds restaurants, bars, wine bars, and cocktail bars that match your personal taste profile.
+A personalized restaurant recommendation engine that lives inside Claude Code. Builds a taste profile through conversation, then searches 30 countries of editorial sources to find places that actually match how you eat.
 
-**What it does:**
-- Searches trusted sources (Reddit, Michelin, Eater, local critics) in multiple languages
-- Filters through your taste profile, anti-patterns, and dining history
-- Outputs structured recommendation cards with addresses, prices, and Google Maps links
-- Records and analyzes your visits over time to improve recommendations
+For people who take restaurants seriously but are tired of TripAdvisor scores and Instagram hype.
+
+## Why this exists
+
+Generic restaurant recommendations fail because they optimize for the average visitor. You are not the average visitor. You have specific opinions about cuisine, atmosphere, wine, and what kills an evening.
+
+This skill solves that by maintaining a persistent taste profile — your cuisine hierarchy, anti-patterns, reference restaurants, trusted sources — and applying it every time you search. It searches Reddit diaspora communities in 3 languages, cross-references editorial critics specific to each country, and filters results through your personal calibration. The more you use it, the better it gets.
+
+## What it does
+
+- **Find** — searches trusted editorial sources (Reddit, Michelin, Eater, 30 countries of local critics) in up to 3 languages per query
+- **Filter** — every result passes through your taste profile, anti-patterns, and dining history before you see it
+- **Record** — log visits with /10 ratings, building a feedback loop that sharpens future recommendations
+- **Analyze** — periodic pattern analysis reveals what actually drives your ratings and proposes profile updates
+- **Evolve** — the profile grows with every visit, every new city, every 10/10 discovery
+
+## Who is this for
+
+Anyone who uses Claude Code and cares about where they eat. The skill is city-agnostic (tested across Madrid, Paris, Berlin, Tokyo, Bangkok, and more) and cuisine-agnostic. It works best if you:
+
+- Have opinions about food beyond "is it good"
+- Visit restaurants regularly (couple, friends, or solo)
+- Want recommendations backed by editorial sources, not crowd averages
+- Are willing to spend 20 minutes on onboarding to calibrate the system
 
 ## Quick Start
 
-### 1. Install the skill
+### 1. Install
 
 ```bash
 mkdir -p ~/.claude/skills/restaurant
@@ -20,13 +39,11 @@ cp local-critics.md ~/.claude/skills/restaurant/local-critics.md
 
 ### 2. Run onboarding
 
-Open Claude Code and type:
-
 ```
 /restaurant
 ```
 
-Claude will detect that the skill is not configured and start the onboarding conversation. It asks questions in batches:
+Claude detects the skill is unconfigured and starts a guided conversation. Questions come in batches, not one by one:
 
 | Block | Topic | Time | Required? |
 |---|---|---|---|
@@ -38,13 +55,61 @@ Claude will detect that the skill is not configured and start the onboarding con
 | 6 | Reference restaurants (5-10 places you love) | ~5 min | Yes |
 | 7 | Evening ritual, booking style, trusted sources | ~2 min | Recommended |
 
-You can skip blocks 3-5, 7 and fill them later. Minimum setup: blocks 1 + 2 + 6 (~10 min). Full setup: ~20 min.
+Minimum setup: blocks 1 + 2 + 6 (~10 min). Full setup: ~20 min. Skip blocks 3-5, 7 and fill them later.
 
-Onboarding creates all necessary files and folders automatically.
+Onboarding creates all files and folders automatically.
+
+## Requirements
+
+- **Claude Code** with skill support
+- **Web search MCP server** (Brave Search, Tavily, Exa, or similar) — required, not optional. The skill searches Reddit, Google, and food critic sites on every recommendation.
+
+## Usage
+
+**Find a spot:**
+```
+/restaurant Madrid sushi
+/restaurant Paris wine bar
+/restaurant Bangkok street food
+/restaurant                       # Claude asks what you need
+```
+
+**Record a visit:**
+```
+went to Septime in Paris, 9/10
+```
+
+**Analyze patterns:**
+```
+analyze my restaurant preferences
+```
+
+## How it works
+
+The skill operates in three modes (find, record, analyze), routed by what you type.
+
+**Search methodology (find mode):**
+1. Reads your taste profile before every recommendation
+2. Determines target city's country, selects local editorial sources from a 26-country lookup table
+3. Searches in up to 3 languages (country + English + cuisine language)
+4. Runs Reddit queries across city subs, diaspora communities, and cuisine subs
+5. Builds an anti-recommendation blacklist before selecting candidates
+6. Cross-checks candidates against your feedback log and saved places
+7. Outputs 3-5 structured cards sorted by relevance, saves to file
+
+**Country-specific intelligence:**
+- Dominant local platforms override general search in Japan (Tabelog), South Korea (Blue Ribbon Survey), Thailand (Wongnai), Hong Kong (OpenRice), Singapore (Makansutra)
+- 30-country editorial database with named critics, publications, and guides (local-critics.md)
+- Diaspora search pattern mandatory for ethnic cuisines — the diaspora knows authenticity better than locals
+
+**Quality rules:**
+- Google Maps rating shown but never used as a filter (3.7-rated places can be 9/10)
+- Better 2 strong picks than 3 mediocre ones — every recommendation needs a clear story
+- No labels, no comparisons to your reference restaurants, no "what to order"
 
 ### Alternative: Manual setup
 
-If you prefer to fill the profile by hand instead of going through onboarding:
+If you prefer to fill the profile by hand instead of onboarding:
 
 ```bash
 mkdir -p ~/Documents/restaurant-data
@@ -52,39 +117,16 @@ cp taste-profile-template.md ~/Documents/restaurant-data/taste-profile.md
 cp feedback-log-template.md ~/Documents/restaurant-data/feedback-log.md
 ```
 
-Then create `~/.claude/skills/restaurant/config.yml`:
+Create `~/.claude/skills/restaurant/config.yml`:
 
 ```yaml
-home_city: Berlin          # your city from onboarding
+home_city: Berlin
 home_address: "Kastanienallee 7"
 data_dir: "/Users/yourname/Documents/restaurant-data"
 saved_places_source: none  # or google_maps / apple_maps
 ```
 
 Fill in `taste-profile.md` — replace HTML comments with your answers.
-
-## Requirements
-
-- **Claude Code** with skill support
-- **Web search** — the skill needs to search Reddit, Google, and food critic sites. Make sure you have a web search MCP server configured (Brave Search, Tavily, Exa, or similar)
-
-## Usage
-
-```
-/restaurant Madrid sushi          # find sushi in Madrid
-/restaurant Paris wine bar        # find a wine bar in Paris
-/restaurant                       # Claude asks what you need
-```
-
-**Record a visit:**
-```
-> went to Septime in Paris, 9/10
-```
-
-**Analyze patterns:**
-```
-> analyze my restaurant preferences
-```
 
 ## File structure
 
@@ -98,21 +140,34 @@ Fill in `taste-profile.md` — replace HTML comments with your answers.
   taste-profile.md             # Your taste profile
   feedback-log.md              # Visit log with ratings
   cities/                      # City recommendation caches
-    madrid.md
-    paris.md
   recommendations/             # Saved recommendation outputs
-    madrid-sushi-2026-03-20.md
-  saved-places-data.md         # Optional: exported saved places
+  saved-places-data.md         # Optional: Google Maps / Apple Maps export
 ```
 
 ## How it improves over time
 
-- Every visit you record helps calibrate future recommendations
+The taste profile is not static. It grows through use:
+
+- Every visit you record recalibrates future recommendations
 - After 3-5 visits, Claude suggests filling in skipped profile sections
-- After visiting a new city, Claude prompts you to add neighbourhood notes
+- After visiting a new city, Claude prompts you to add neighbourhood notes and city quirks
 - After a 10/10 visit, Claude suggests adding it to your reference restaurants
-- Running "analyze" periodically finds patterns and proposes profile updates
+- Running "analyze" periodically finds patterns in your ratings and proposes profile updates
+- No profile changes happen without your explicit confirmation
+
+## What's included
+
+| File | Lines | Purpose |
+|---|---|---|
+| SKILL.md | 350 | Core skill: search rules, output format, onboarding flow |
+| local-critics.md | 758 | Editorial food sources for 30 countries (named critics, publications, platforms) |
+| taste-profile-template.md | 147 | Empty taste profile with all sections and guidance comments |
+| feedback-log-template.md | 72 | Visit log template with rating scale and entry format |
 
 ## Credits
 
-Built on top of hard-won search patterns, taste calibration methods, and output formats refined over months of real-world use.
+Built on search patterns, taste calibration methods, and output formats refined over months of real-world use across multiple cities and cuisines.
+
+## License
+
+MIT
