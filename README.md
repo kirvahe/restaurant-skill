@@ -127,7 +127,7 @@ Create `~/.claude/skills/restaurant/config.yml`:
 ```yaml
 version: "1.0"
 home_city: Berlin
-home_address: "Kastanienallee 7"
+home_address: "Musterstrasse 42"
 data_dir: "/Users/yourname/Documents/restaurant-data"
 saved_places_source: none  # or google_maps / apple_maps
 ```

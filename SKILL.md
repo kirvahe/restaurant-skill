@@ -25,7 +25,7 @@ Created during onboarding. Contains:
 ```yaml
 version: "1.0"
 home_city: Berlin          # set during onboarding
-home_address: "Kastanienallee 7"
+home_address: "Musterstrasse 42"
 data_dir: "/Users/yourname/Documents/restaurant-data"
 saved_places_source: google_maps  # or apple_maps / none
 ```
