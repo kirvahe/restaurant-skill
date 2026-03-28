@@ -32,6 +32,11 @@ Anyone who uses Claude Code and cares about where they eat. The skill is city-ag
 ### 1. Install
 
 ```bash
+git clone https://github.com/kirvahe/restaurant-skill.git && cd restaurant-skill && ./install.sh
+```
+
+Or manually:
+```bash
 mkdir -p ~/.claude/skills/restaurant
 cp SKILL.md ~/.claude/skills/restaurant/SKILL.md
 cp local-critics.md ~/.claude/skills/restaurant/local-critics.md
@@ -62,7 +67,7 @@ Onboarding creates all files and folders automatically.
 ## Requirements
 
 - **Claude Code** with skill support
-- **Web search MCP server** (Brave Search, Tavily, Exa, or similar) — required, not optional. The skill searches Reddit, Google, and food critic sites on every recommendation.
+- **Web search MCP server** (Exa, Firecrawl, Brave Search, or similar) — the skill auto-detects available search tools. Works best with web search, but has a degraded mode without it.
 
 ## Usage
 
@@ -90,16 +95,16 @@ The skill operates in three modes (find, record, analyze), routed by what you ty
 
 **Search methodology (find mode):**
 1. Reads your taste profile before every recommendation
-2. Determines target city's country, selects local editorial sources from a 26-country lookup table
+2. Determines target city's country, selects local editorial sources from a 31-country database
 3. Searches in up to 3 languages (country + English + cuisine language)
 4. Runs Reddit queries across city subs, diaspora communities, and cuisine subs
 5. Builds an anti-recommendation blacklist before selecting candidates
 6. Cross-checks candidates against your feedback log and saved places
-7. Outputs 3-5 structured cards sorted by relevance, saves to file
+7. Outputs 2-5 structured cards sorted by relevance, saves to file
 
 **Country-specific intelligence:**
 - Dominant local platforms override general search in Japan (Tabelog), South Korea (Blue Ribbon Survey), Thailand (Wongnai), Hong Kong (OpenRice), Singapore (Makansutra)
-- 30-country editorial database with named critics, publications, and guides (local-critics.md)
+- 31-country editorial database with named critics, publications, and guides (local-critics.md)
 - Diaspora search pattern mandatory for ethnic cuisines — the diaspora knows authenticity better than locals
 
 **Quality rules:**
@@ -120,6 +125,7 @@ cp feedback-log-template.md ~/Documents/restaurant-data/feedback-log.md
 Create `~/.claude/skills/restaurant/config.yml`:
 
 ```yaml
+version: "1.0"
 home_city: Berlin
 home_address: "Kastanienallee 7"
 data_dir: "/Users/yourname/Documents/restaurant-data"
@@ -133,7 +139,7 @@ Fill in `taste-profile.md` — replace HTML comments with your answers.
 ```
 ~/.claude/skills/restaurant/
   SKILL.md                     # Skill definition (search rules, output format, onboarding)
-  local-critics.md             # Editorial food sources by country (30 countries, 750+ entries)
+  local-critics.md             # Editorial food sources by country (31 countries, 180+ sources)
   config.yml                   # Home city, address, settings (created during onboarding)
 
 ~/Documents/restaurant-data/   # Your data (path configured in config.yml)
@@ -159,10 +165,12 @@ The taste profile is not static. It grows through use:
 
 | File | Lines | Purpose |
 |---|---|---|
-| SKILL.md | 350 | Core skill: search rules, output format, onboarding flow |
-| local-critics.md | 758 | Editorial food sources for 30 countries (named critics, publications, platforms) |
-| taste-profile-template.md | 147 | Empty taste profile with all sections and guidance comments |
-| feedback-log-template.md | 72 | Visit log template with rating scale and entry format |
+| SKILL.md | 260 | Core skill: search rules, output format, onboarding, resilience |
+| local-critics.md | 778 | Editorial food sources for 31 countries (named critics, publications, platforms) |
+| taste-profile-template.md | 146 | Empty taste profile with all sections and guidance comments |
+| feedback-log-template.md | 71 | Visit log template with rating scale and entry format |
+| cities-template.md | 17 | Template for city recommendation caches |
+| install.sh | 95 | One-command installer with --uninstall support |
 
 ## Credits
 

@@ -80,10 +80,10 @@ v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 5 files, 1,458 l
 
 | Iteration | Impact | Effort | Priority |
 |---|---|---|---|
-| 1.1 Calibration loop | High | Low | v1.0 |
-| 1.2 Recommendation debrief | High | Medium | v1.0 |
-| 2.1 One-command install | Medium | Low | v1.0 |
-| 2.3 MCP independence | High | Medium | v1.0 |
+| 1.1 Calibration loop | High | Low | **v1.0 ✓** |
+| 1.2 Recommendation debrief | High | Medium | **v1.0 ✓** |
+| 2.1 One-command install | Medium | Low | **v1.0 ✓** |
+| 2.3 MCP independence | High | Medium | **v1.0 ✓** |
 | 1.5 Seasonal recs | Medium | Low | v1.1 |
 | 1.6 City learning | Medium | Medium | v1.1 |
 | 2.5 Skill template | High | High | v1.1 |
@@ -98,8 +98,17 @@ v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 5 files, 1,458 l
 | 2.9 i18n | Medium | High | v2.0 |
 | 2.10 Analytics dashboard | Low | High | v2.0 |
 
-## v1.0 target (next iteration)
-- Calibration loop (1.1)
-- Recommendation debrief (1.2)
-- One-command install (2.1)
-- MCP server independence (2.3)
+## v1.0 (shipped)
+- ✓ Calibration loop (1.1)
+- ✓ Recommendation debrief (1.2)
+- ✓ One-command install (2.1)
+- ✓ MCP server independence (2.3)
+- ✓ Error handling / resilience section
+- ✓ Intent-based routing (replaces keyword matching)
+- ✓ SKILL.md simplified from 366 → 260 lines
+
+## v1.1 target (next iteration)
+- Seasonal recommendations (1.5)
+- City learning (1.6)
+- Local critics refresh process (2.6)
+- Skill template framework (2.5)
