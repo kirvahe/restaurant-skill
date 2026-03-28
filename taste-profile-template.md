@@ -130,8 +130,11 @@
 ### Strong plus (8-9/10)
 <!-- Great places you'd return to. Same format. -->
 
-### Ok, but doesn't spark (5-7/10)
-<!-- Places that were fine but didn't excite. Helps calibrate. -->
+### Ok, but doesn't spark (6-7/10)
+<!-- Places that were decent but didn't excite. Helps calibrate. -->
+
+### Disappointing (5/10 and below)
+<!-- Places that actively disappointed. What went wrong helps sharpen anti-patterns. -->
 
 ---
 

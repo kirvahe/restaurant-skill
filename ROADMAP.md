@@ -2,7 +2,7 @@
 
 ## Context
 
-v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 5 files, 1,458 lines, 42 tests passed. Before closing the project, need a roadmap for two axes: (1) quality — making recommendations better, (2) scalability — making the skill easier to distribute, adapt, and extend.
+v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 8 files, ~1,700 lines. Before closing the project, need a roadmap for two axes: (1) quality — making recommendations better, (2) scalability — making the skill easier to distribute, adapt, and extend.
 
 ## Axis 1: Quality — making recommendations better
 
@@ -46,7 +46,7 @@ v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 5 files, 1,458 l
 
 ### 2.3 MCP server independence
 **Problem:** Requires specific web search MCP. Different users have different MCPs.
-**Iteration:** Abstract search layer — detect available MCP (Brave, Tavily, Exa, Perplexity) and adapt queries. Graceful fallback if no web search available (use only saved places + feedback-log).
+**Iteration:** Abstract search layer — detect available MCP (Exa, Firecrawl, or any web search tool) and adapt queries. Graceful fallback if no web search available (use only saved places + feedback-log). ✓ Shipped in v1.0.
 
 ### 2.4 Multi-user profiles
 **Problem:** One profile per install. Couples with different tastes can't share.

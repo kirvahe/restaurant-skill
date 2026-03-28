@@ -1,0 +1,10 @@
+# User data (contains PII -- home address, dining habits)
+config.yml
+taste-profile.md
+feedback-log.md
+cities/
+recommendations/
+saved-places-data.md
+
+# OS
+.DS_Store

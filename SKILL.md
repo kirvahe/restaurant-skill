@@ -11,10 +11,11 @@ On first use, Claude must check if the skill is configured:
 1. Look for `~/.claude/skills/restaurant/config.yml`
 2. If `config.yml` does NOT exist → run Onboarding from Block 1
 3. If `config.yml` exists → read it, load taste-profile.md from `data_dir`
-4. Check if onboarding is complete — taste-profile.md must have all three required sections filled (not empty, not template placeholders):
+4. Check if onboarding is complete — taste-profile.md must have all three required sections filled:
    - **Who** section (Block 1) — home city, companions, budget
    - **Cuisine** section (Block 2) — hierarchy, comfort dishes
    - **Reference restaurants** section (Block 6) — at least 3 calibration entries
+   A section is **filled** if it contains text outside HTML comments (`<!-- -->`), is not just whitespace, and does not only contain `[SKIPPED]`. HTML comments alone = template placeholder (incomplete). `[SKIPPED]` = intentionally skipped (do not re-ask).
    If any required section is missing → resume Onboarding from the first incomplete required block
 5. If complete → proceed to Routing
 
@@ -45,26 +46,15 @@ All paths relative to `data_dir` from config.yml:
 | `saved-places-data.md` | Saved places lists (optional — Google Maps, Apple Maps, etc.) |
 
 **Reference file** (lives next to SKILL.md in `~/.claude/skills/restaurant/`):
-- `local-critics.md` — Editorial food sources by country (30 countries). Read when searching new countries or during onboarding.
+- `local-critics.md` — Editorial food sources by country (31 countries). Read when searching new countries or during onboarding.
 
 ## Resilience
 
-### Before any action, check data files:
-- **taste-profile.md missing or empty** → STOP. Tell user: "Taste profile not found. Run `/restaurant` to start onboarding." Do not guess preferences.
-- **feedback-log.md missing or empty** → continue without visit cross-checks. Note in output: "No visit history loaded."
-- **saved-places data broken/missing** → continue without saved-places cross-check. Note: "Saved places unavailable."
-- **cities/{city}.md missing** → normal for first search in a city. No warning needed. Will be created on save.
-- **recommendations/ or cities/ directory missing** → create with `mkdir -p` before saving. Never fail on missing directory.
-
-### Web search failure:
-- If primary search tool returns error or empty results → try fallback tool (see Search tool detection below).
-- If ALL search tools fail → use training knowledge only. Add to Overview: "Web search unavailable — recommendations based on training data only. Verify independently."
-- Never silently degrade. If any data source was unavailable, state which one and what was skipped.
-
-### Data integrity:
-- If a file exists but cannot be parsed (garbled content, broken markdown) → treat as missing. Tell user: "File appears corrupted — proceeding without it."
-- One missing enhanced data source is normal. Two or more missing → add a disclaimer to the output.
-- Never invent data to fill gaps (fake ratings, imagined visit history, fabricated sources).
+- **taste-profile.md missing** → STOP. Tell user to run `/restaurant` for onboarding. Do not guess preferences.
+- **feedback-log.md / saved-places / cities/ missing** → continue, note what's unavailable. Create directories with `mkdir -p` as needed.
+- **Web search failure** → try fallback tool, then training knowledge. Add disclaimer: "Web search unavailable."
+- **Corrupted file** → treat as missing. Tell user.
+- Never silently degrade. Never invent data to fill gaps.
 
 ## Routing
 
@@ -92,12 +82,12 @@ Reference restaurants from the profile are internal calibration — NEVER mentio
 
 ## Sources
 
-These are defaults. User's taste-profile.md overrides them.
+These are defaults. User's taste-profile.md trusted sources extend this list. User cannot override the Banned list — those are always excluded.
 
 ### Trusted (use these)
 Reddit (city subs, diaspora) · Conde Nast Traveller · Eater · The Infatuation · Monocle · Gambero Rosso · OAD · Noble Rot · Punch (drinks) · La Liste · Gault & Millau · Raw Wine · Wine Spectator (wine lists) · Serious Eats · Vittles · Fare Magazine · Raisin (natural wine) · Michelin Guide (Bib Gourmand, recs) · World's 50 Best · Google Maps
 
-**Local critics:** For every recommendation, look up the target country in `local-critics.md` (30 countries, named critics, publications, dominant platforms).
+**Local critics:** For every recommendation, look up the target country in `local-critics.md` (31 countries, named critics, publications, dominant platforms).
 
 ### Banned — NEVER use
 TripAdvisor · Yelp · TheFork · Instagram · Tourist guides · AI-generated listicles · GetYourGuide/Viator
@@ -109,11 +99,11 @@ TripAdvisor · Yelp · TheFork · Instagram · Tourist guides · AI-generated li
 ### Search tool detection
 On first search of session, check available tools in this priority order:
 1. `mcp__exa__web_search_exa` (semantic — best for editorial/Reddit)
-2. `mcp__firecrawl__firecrawl_search` (web — best for structured extraction)
-3. `mcp__brave__brave_web_search` / `mcp__tavily__*` (keyword — general)
+2. `mcp__firecrawl__firecrawl_search` (keyword — best for structured extraction)
+3. Any other available web search MCP tool
 4. Built-in WebSearch/WebFetch (limited, no site: filtering)
 5. None available → Degraded Mode (see Resilience section)
-Cache the selected tool for the session. Re-detect only on error.
+Once a tool works, keep using it for the conversation. If it errors (timeout, auth failure), try the next. Empty results = reformulate query, not a tool error.
 
 ### Language rule — search in up to 3 languages:
 1. Country language FIRST — local critics are strongest
@@ -141,12 +131,9 @@ When `saved_places_source` is not `none`, check saved-places-data.md for lists m
 - Family business with 2-4 locations is NOT a "chain". Chain = corporate (soulless, "for everyone")
 
 ### Google Maps rating — information, NOT a filter:
-- Always show rating + review count in the card
-- Do NOT filter by rating. Threshold: 3.0+ = consider
-- High rating ≠ good place. Low rating ≠ bad place
-- Factors that deflate ratings: authentic cuisine without adaptation, no English menu, small/no-frills service, family business not chasing reviews
-- Factors that inflate ratings: tourist wow-effect, beautiful interior masking average food, managed reviews
-- Decision is made by sources, format, and taste profile match — not by the number
+- Show rating + review count in the card. Do NOT filter by rating (3.0+ = consider)
+- High rating ≠ good place (tourist wow-effect, managed reviews). Low rating ≠ bad place (authentic, no English menu, not chasing reviews)
+- Decision by sources, format, and taste profile match — not the number
 
 ---
 
@@ -183,6 +170,8 @@ When `saved_places_source` is not `none`, check saved-places-data.md for lists m
 1. Save as `recommendations/{city}-{type}-YYYY-MM-DD.md` — write using Bash tool, do not show file content in chat
 2. Update `cities/{city}.md` cache — write using Bash tool, do not show file content in chat
 3. Last line of chat: link to saved .md file
+
+**File naming:** Use lowercase kebab-case for city and type in file paths. Strip diacritics. Remove characters outside `[a-z0-9-]`. Collapse multiple hyphens. Examples: `kuala-lumpur`, `sao-paulo`, `tel-aviv`, `wine-bar`. Before writing, verify the filename matches `^[a-z0-9-]+$`.
 
 **Always end with the .md file link** — every response (find, record, analyze) must finish with a link to the saved/updated file.
 
@@ -237,9 +226,9 @@ Never change profile without explicit user confirmation.
 
 | Block | Required? | Topic | Key questions | After block |
 |---|---|---|---|---|
-| 1 | **Yes** | Setup | City, address, companions, budget, diet, restaurants-as-hobby, saved places source | Create config.yml, data_dir, initial files. If saved places → ask user to export/share data |
+| 1 | **Yes** | Setup | City, address, companions, budget, diet, restaurants-as-hobby, saved places source | Create config.yml, data_dir, initial files. Update taste-profile.md Who section. If saved places → note for post-onboarding setup |
 | 2 | **Yes** | Cuisines | Top 3 cuisines, avoid list, 2-3 comfort dishes, spicy/offal/raw/seafood preferences | Update taste-profile.md Cuisine section |
-| 3 | No | Food philosophy | Product vs concept, returnability, sharing plates, seasonality | Update Taste Compass |
+| 3 | No | Food philosophy | Product vs concept, returnability, sharing plates | Update Taste Compass |
 | 4 | No | Atmosphere & drinks | Room type, design, wine, cocktails, coffee, service style | Update Atmosphere/Wine/Cocktails/Coffee/Service |
 | 5 | No | Anti-patterns | Present checklist from taste-profile-template.md. Ask for a disappointing experience example | Update Anti-patterns |
 | 6 | **Yes** | Reference restaurants | 5-10 loved places (name, city, cuisine, /10, why). 2-3 disappointing places (what went wrong) | Update References. Add all to feedback-log.md (use "--" for unknown fields, approximate date or "--" for Date, "(historical)" in Notes) |

@@ -21,6 +21,20 @@ log()  { echo -e "${GREEN}✓${NC} $1"; }
 warn() { echo -e "${YELLOW}!${NC} $1"; }
 die()  { echo -e "${RED}✗${NC} $1" >&2; exit 1; }
 
+# Read a value from flat YAML config (key: value format)
+# Handles: double/single quotes, trailing comments, tilde expansion
+read_config() {
+  local file="$1" key="$2"
+  local val
+  val=$(awk -F': ' -v k="$key" '$1==k {print $2; exit}' "$file")
+  val="${val%\"}" ; val="${val#\"}"   # strip double quotes
+  val="${val%\'}" ; val="${val#\'}"   # strip single quotes
+  val="${val%%#*}"                    # strip trailing comment
+  val="${val%"${val##*[![:space:]]}"}" # strip trailing whitespace
+  val="${val/#\~/$HOME}"             # expand leading tilde
+  printf '%s' "$val"
+}
+
 usage() {
   echo "Usage: ./install.sh [OPTIONS]"
   echo ""
@@ -42,25 +56,53 @@ usage() {
 # Parse args
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --data-dir) DATA_DIR="$2"; shift 2 ;;
+    --data-dir)
+      if [[ -z "${2:-}" ]] || [[ "$2" == --* ]]; then
+        die "--data-dir requires a directory path"
+      fi
+      DATA_DIR="$2"; shift 2
+      ;;
     --uninstall) UNINSTALL=true; shift ;;
     --help) usage; exit 0 ;;
     *) die "Unknown option: $1. Use --help for usage." ;;
   esac
 done
 
+# On reinstall: honor data_dir from existing config if no --data-dir was passed
+if [ -z "$DATA_DIR" ] && [ -f "$SKILL_DIR/config.yml" ]; then
+  PARSED_DIR=$(read_config "$SKILL_DIR/config.yml" "data_dir")
+  if [[ -n "$PARSED_DIR" ]] && [[ "$PARSED_DIR" =~ ^/ ]]; then
+    DATA_DIR="$PARSED_DIR"
+    log "Using data_dir from existing config: $DATA_DIR"
+  fi
+fi
 DATA_DIR="${DATA_DIR:-$DEFAULT_DATA_DIR}"
 
 # Uninstall
 if [ "$UNINSTALL" = true ]; then
+  ACTUAL_DATA_DIR="$DATA_DIR"
   if [ -d "$SKILL_DIR" ]; then
-    rm -rf "$SKILL_DIR"
+    # Read actual data_dir from config before removing anything
+    if [ -f "$SKILL_DIR/config.yml" ]; then
+      PARSED_DIR=$(read_config "$SKILL_DIR/config.yml" "data_dir")
+      if [[ -n "$PARSED_DIR" ]] && [[ "$PARSED_DIR" =~ ^/ ]]; then
+        ACTUAL_DATA_DIR="$PARSED_DIR"
+      fi
+    fi
+    # Remove only repo-managed files, preserve config.yml
+    rm -f "$SKILL_DIR/SKILL.md" "$SKILL_DIR/local-critics.md"
     log "Removed skill files from $SKILL_DIR"
+    # Remove dir only if empty
+    if rmdir "$SKILL_DIR" 2>/dev/null; then
+      log "Removed empty $SKILL_DIR"
+    else
+      log "Config preserved at $SKILL_DIR/config.yml -- reinstall will reuse your settings"
+    fi
   else
     warn "Skill directory not found at $SKILL_DIR"
   fi
   echo ""
-  echo "Your data at $DATA_DIR was NOT removed."
+  echo "Your data at $ACTUAL_DATA_DIR was NOT removed."
   echo "Delete it manually if you no longer need it."
   exit 0
 fi
@@ -95,6 +137,16 @@ if [ -f "$SCRIPT_DIR/feedback-log-template.md" ] && [ ! -f "$DATA_DIR/feedback-l
   log "Created feedback-log.md from template"
 else
   [ -f "$DATA_DIR/feedback-log.md" ] && log "feedback-log.md already exists — kept"
+fi
+
+# Protect data directory from accidental git commits
+if [ ! -f "$DATA_DIR/.gitignore" ]; then
+  cat > "$DATA_DIR/.gitignore" << 'GITIGNORE'
+# This directory contains personal data. Do not commit.
+*
+!.gitignore
+GITIGNORE
+  log "Created .gitignore in data directory"
 fi
 
 log "Data directory ready at $DATA_DIR"
