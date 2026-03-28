@@ -4,13 +4,13 @@ description: Find restaurants, bars, wine bars, and cocktail bars matching taste
 argument-hint: [city mood/type]
 ---
 
-## Setup
+## Setup — MANDATORY, EXECUTE BEFORE EVERY RESPONSE
 
-On first use, Claude must check if the skill is configured:
+**ALWAYS do this before any other action.** Use the Read tool to check `~/.claude/skills/restaurant/config.yml`. Do NOT skip this step. Do NOT proceed to Routing, searching, or answering until the check is complete.
 
-1. Look for `~/.claude/skills/restaurant/config.yml`
-2. If `config.yml` does NOT exist → run Onboarding from Block 1
-3. If `config.yml` exists → read it, load taste-profile.md from `data_dir`
+1. **Read** `~/.claude/skills/restaurant/config.yml` (use Read tool — not "look for", actually read the file)
+2. If the file does NOT exist or Read returns an error → STOP. Run Onboarding from Block 1. Do NOT ask "what are you looking for?" — start onboarding immediately.
+3. If the file exists → read `data_dir` from it, then **Read** `{data_dir}/taste-profile.md`
 4. Check if onboarding is complete — taste-profile.md must have all three required sections filled:
    - **Who** section (Block 1) — home city, companions, budget
    - **Cuisine** section (Block 2) — hierarchy, comfort dishes
