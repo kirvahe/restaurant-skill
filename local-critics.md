@@ -520,6 +520,27 @@ Gault&Millau is THE reference in Austria. Michelin only covers Vienna and Salzbu
 
 ---
 
+### SWITZERLAND
+
+#### National Guides
+
+| Source | Type | Best for | Language | Active |
+|---|---|---|---|---|
+| **Gault&Millau Schweiz** | National guide (dominant — more influential than Michelin in Switzerland) | Fine dining, creativity | German/French | Yes — 2025 edition |
+| **Michelin Guide Switzerland** | International guide | Fine dining | German/French/English | Yes |
+| **GastroJournal** | Trade magazine | Industry, trends | German/French | Yes |
+
+#### Newspaper Critics
+
+| Critic | Publication | Best for | Notes |
+|---|---|---|---|
+| **Samuel Herzog** | NZZ (Neue Zürcher Zeitung) | Zurich, broad | Long-serving NZZ food columnist |
+
+#### Note on Switzerland
+Gault&Millau is THE reference — more trusted than Michelin locally. Strong regional variation: German-speaking Switzerland follows Austrian/German dining culture, French-speaking follows French. Zurich and Geneva are the primary dining cities.
+
+---
+
 ## TIER 3 -- Growing/Niche Scenes
 
 ---
