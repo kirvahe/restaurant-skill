@@ -1,4 +1,4 @@
-version: "1.2"
+version: "1.2.1"
 home_city: Berlin
 home_address: "Musterstrasse 42"
 data_dir: "/Users/yourname/Documents/restaurant-data"

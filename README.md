@@ -67,6 +67,23 @@ Minimum setup: blocks 1 + 2 + 6 (~10 min). Full setup: ~20 min. Skip blocks 3-5,
 
 Onboarding creates all files and folders automatically.
 
+### 3. Auto-updates (optional, recommended)
+
+During install, you'll be asked: **`Enable auto-updates via SessionStart hook? [Y/n]`**.
+
+If you say **Yes**, the installer adds a small SessionStart hook to `~/.claude/settings.json` that:
+
+- Runs at most once every 24 hours, async (doesn't slow Claude Code startup)
+- Maintains a hidden clone at `~/.claude/skills/restaurant/.source/`
+- Fast-forward merges new commits from this repo
+- Re-runs `install.sh --non-interactive` when updates are available
+- Prints a one-line notification in chat: `✓ /restaurant updated to vX.Y.Z — <release URL>`
+- Preserves your `config.yml` and personal data (via the install-safety hardening introduced in v1.1)
+
+After enabling, you never need to think about updates again.
+
+**To disable later**: edit `~/.claude/settings.json` and remove the entry pointing at `sync-restaurant-skill.sh`, or run `./install.sh --uninstall` (which removes both skill files and the hook).
+
 ## Requirements
 
 - **Claude Code** with skill support
