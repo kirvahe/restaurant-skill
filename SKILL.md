@@ -2,7 +2,7 @@
 name: restaurant
 description: Find restaurants, bars, wine bars, and cocktail bars matching taste profile. This skill should be used when the user asks for restaurant, bar, wine bar, or cocktail bar recommendations, wants to rate a visited place, or asks to analyze dining patterns. Triggers on food/drink venue recommendations, "where to eat", "want a drink", "bar", "wine", "cocktails", city names with food/drink context.
 argument-hint: [city mood/type]
-version: "1.2"
+version: "1.2.1"
 ---
 
 ## Setup
@@ -24,7 +24,7 @@ On first use, Claude must check if the skill is configured:
 Created during onboarding. Contains:
 
 ```yaml
-version: "1.2"
+version: "1.2.1"
 home_city: Berlin                                          # set during onboarding
 home_address: "Musterstrasse 42"
 data_dir: "/Users/yourname/Documents/restaurant-data"

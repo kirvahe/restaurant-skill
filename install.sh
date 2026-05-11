@@ -9,7 +9,11 @@ DEFAULT_DATA_DIR="$HOME/Documents/restaurant-data"
 SKILL_DIR=""
 DATA_DIR=""
 UNINSTALL=false
+NON_INTERACTIVE=false
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+HOOK_SCRIPT_NAME="sync-restaurant-skill.sh"
+HOOK_SCRIPT_DEST="$HOME/.claude/scripts/$HOOK_SCRIPT_NAME"
+SETTINGS_FILE="$HOME/.claude/settings.json"
 
 # Colors (only if terminal)
 if [ -t 1 ]; then
@@ -53,16 +57,124 @@ copy_dir() {
   log "Installed $count file(s) to $dst"
 }
 
+# Print the SessionStart hook JSON snippet for manual addition to ~/.claude/settings.json
+print_hook_snippet() {
+  echo ""
+  echo "Add this to ~/.claude/settings.json under hooks.SessionStart[0].hooks:"
+  echo ""
+  echo "  {"
+  echo "    \"type\": \"command\","
+  echo "    \"command\": \"$HOOK_SCRIPT_DEST\","
+  echo "    \"async\": true"
+  echo "  }"
+  echo ""
+}
+
+# Add the SessionStart hook to settings.json using jq.
+# Idempotent — won't duplicate if command already present.
+# Backs up settings.json before modifying.
+add_hook_to_settings() {
+  if ! command -v jq >/dev/null 2>&1; then
+    warn "jq not found — cannot auto-modify settings.json"
+    print_hook_snippet
+    return 0
+  fi
+
+  mkdir -p "$(dirname "$SETTINGS_FILE")"
+  if [ -f "$SETTINGS_FILE" ]; then
+    cp "$SETTINGS_FILE" "$SETTINGS_FILE.bak-$(date +%s)"
+  else
+    echo '{}' > "$SETTINGS_FILE"
+  fi
+
+  local new_hook
+  new_hook=$(jq -n --arg cmd "$HOOK_SCRIPT_DEST" \
+    '{type:"command", command:$cmd, async:true}')
+
+  local tmp="$SETTINGS_FILE.tmp"
+  if jq --argjson new "$new_hook" '
+    .hooks //= {} |
+    .hooks.SessionStart //= [{matcher:"startup", hooks:[]}] |
+    if (.hooks.SessionStart | length) == 0 then
+      .hooks.SessionStart = [{matcher:"startup", hooks:[]}]
+    else . end |
+    (.hooks.SessionStart[0].hooks // []) as $existing |
+    if any($existing[]; .command == $new.command) then .
+    else .hooks.SessionStart[0].hooks = $existing + [$new]
+    end
+  ' "$SETTINGS_FILE" > "$tmp" 2>/dev/null; then
+    mv "$tmp" "$SETTINGS_FILE"
+    log "Auto-update hook added to $SETTINGS_FILE"
+  else
+    rm -f "$tmp"
+    warn "Could not parse $SETTINGS_FILE — leaving it untouched"
+    print_hook_snippet
+  fi
+}
+
+# Remove our SessionStart hook from settings.json (jq-based, with backup).
+remove_hook_from_settings() {
+  [ -f "$SETTINGS_FILE" ] || return 0
+  command -v jq >/dev/null 2>&1 || return 0
+
+  cp "$SETTINGS_FILE" "$SETTINGS_FILE.bak-$(date +%s)"
+  local tmp="$SETTINGS_FILE.tmp"
+  if jq --arg cmd "$HOOK_SCRIPT_DEST" '
+    if (.hooks.SessionStart // []) | length > 0 then
+      .hooks.SessionStart[0].hooks = (
+        (.hooks.SessionStart[0].hooks // []) | map(select(.command != $cmd))
+      )
+    else . end
+  ' "$SETTINGS_FILE" > "$tmp" 2>/dev/null; then
+    mv "$tmp" "$SETTINGS_FILE"
+    log "Auto-update hook removed from $SETTINGS_FILE"
+  else
+    rm -f "$tmp"
+    warn "Could not modify $SETTINGS_FILE (keep manually editing)"
+  fi
+}
+
+# Deploy the sync script and offer to wire up the SessionStart hook.
+# In --non-interactive mode (used by sync script itself): deploy script, skip hook prompt.
+setup_auto_update() {
+  [ -f "$SCRIPT_DIR/scripts/$HOOK_SCRIPT_NAME" ] || return 0
+
+  mkdir -p "$(dirname "$HOOK_SCRIPT_DEST")"
+  cp "$SCRIPT_DIR/scripts/$HOOK_SCRIPT_NAME" "$HOOK_SCRIPT_DEST"
+  chmod +x "$HOOK_SCRIPT_DEST"
+  log "Installed sync script to $HOOK_SCRIPT_DEST"
+
+  if [ "$NON_INTERACTIVE" = true ]; then
+    return 0
+  fi
+
+  echo ""
+  echo "Enable automatic updates?"
+  echo "  Adds a SessionStart hook that pulls upstream every 24h and re-runs install."
+  echo "  Your config.yml and data are preserved."
+  read -r -p "  [Y/n] " reply
+  case "$reply" in
+    n|N|no|No|NO)
+      log "Auto-update declined — to enable later, see the hook JSON below:"
+      print_hook_snippet
+      ;;
+    *)
+      add_hook_to_settings
+      ;;
+  esac
+}
+
 usage() {
   echo "Usage: ./install.sh [OPTIONS]"
   echo ""
   echo "Install the /restaurant skill for Claude Code."
   echo ""
   echo "Options:"
-  echo "  --skill-dir DIR  Set skill directory (default: ~/.claude/skills/restaurant)"
-  echo "  --data-dir DIR   Set data directory (default: ~/Documents/restaurant-data)"
-  echo "  --uninstall      Remove skill files (preserves your data + config.yml)"
-  echo "  --help           Show this help"
+  echo "  --skill-dir DIR    Set skill directory (default: ~/.claude/skills/restaurant)"
+  echo "  --data-dir DIR     Set data directory (default: ~/Documents/restaurant-data)"
+  echo "  --uninstall        Remove skill files (preserves your data + config.yml)"
+  echo "  --non-interactive  Skip all prompts (used by the auto-update sync script)"
+  echo "  --help             Show this help"
   echo ""
   echo "What it does:"
   echo "  - Copies SKILL.md, local-critics.md, references/, evals/ to the skill dir"
@@ -88,6 +200,7 @@ while [[ $# -gt 0 ]]; do
       DATA_DIR="$2"; shift 2
       ;;
     --uninstall) UNINSTALL=true; shift ;;
+    --non-interactive) NON_INTERACTIVE=true; shift ;;
     --help) usage; exit 0 ;;
     *) die "Unknown option: $1. Use --help for usage." ;;
   esac
@@ -119,8 +232,15 @@ if [ "$UNINSTALL" = true ]; then
     fi
     # Remove only repo-managed files, preserve config.yml
     rm -f "$SKILL_DIR/SKILL.md" "$SKILL_DIR/local-critics.md"
-    rm -rf "$SKILL_DIR/references" "$SKILL_DIR/evals"
+    rm -rf "$SKILL_DIR/references" "$SKILL_DIR/evals" "$SKILL_DIR/.source"
+    rm -f "$SKILL_DIR/.last-sync"
     log "Removed skill files from $SKILL_DIR"
+    # Remove the sync script + SessionStart hook
+    if [ -f "$HOOK_SCRIPT_DEST" ]; then
+      rm -f "$HOOK_SCRIPT_DEST"
+      log "Removed sync script $HOOK_SCRIPT_DEST"
+    fi
+    remove_hook_from_settings
     # Remove dir only if empty
     if rmdir "$SKILL_DIR" 2>/dev/null; then
       log "Removed empty $SKILL_DIR"
@@ -183,6 +303,9 @@ GITIGNORE
 fi
 
 log "Data directory ready at $DATA_DIR"
+
+# Auto-update wiring (deploys sync script + optionally adds SessionStart hook)
+setup_auto_update
 
 echo ""
 echo "Done! Open Claude Code and type /restaurant to start onboarding."

@@ -1,11 +1,28 @@
 # Changelog
 
 All notable changes to this project are documented here.
-Format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/); the project uses 2-part `vMAJOR.MINOR` versioning aligned with its commit-title history (v0.9.0 retains its 3-part shape from the original beta tag; subsequent releases use 2-part `vX.Y`).
+Format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/); the project uses 2-part `vMAJOR.MINOR` versioning, with patch-level bumps (`vMAJOR.MINOR.PATCH`) when tooling around the skill changes without changing skill content.
 
 Note: entries for v0.9.0, v1.0, and v1.1 were backfilled retroactively on 2026-05-11 — they were never formally tagged at the time of their commits.
 
 ## [Unreleased]
+
+## [v1.2.1] — 2026-05-11
+
+Adds automatic updates via a SessionStart hook. After running `./install.sh` once with this version, future releases install themselves silently every 24 hours — no terminal commands required. Skill content is identical to v1.2.
+
+### Added
+- `scripts/sync-restaurant-skill.sh` — async sync script with 24h throttle. Maintains a persistent clone at `~/.claude/skills/restaurant/.source/`, fast-forward merges from upstream, re-runs `./install.sh --non-interactive` when new commits arrive. Emits a one-line notification in Claude Code chat when an update is applied.
+- `install.sh` `--non-interactive` flag — used by the sync script to install without prompts.
+- `install.sh` interactive prompt: `Enable auto-updates via SessionStart hook? [Y/n]` — defaults to Yes. On Yes, the hook is added to `~/.claude/settings.json` via `jq` with a timestamped backup. On No, the JSON snippet is printed for manual addition.
+- `install.sh --uninstall` now also removes the sync script and the SessionStart hook entry from `settings.json` (with backup).
+
+### Changed
+- `install.sh` `--help` text documents the new flag and behavior.
+
+### Migration (from v1.2)
+- **Recommended**: re-run `./install.sh` and accept the auto-update prompt. From that point on, future versions install themselves on the next Claude Code session that's >24h since the last sync.
+- **Opt out**: decline the prompt, or run `./install.sh --uninstall` then reinstall without auto-update if you previously enabled it.
 
 ## [v1.2] — 2026-05-11
 
