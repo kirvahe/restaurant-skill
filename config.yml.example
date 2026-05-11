@@ -1,0 +1,8 @@
+version: "1.2"
+home_city: Berlin
+home_address: "Musterstrasse 42"
+data_dir: "/Users/yourname/Documents/restaurant-data"
+saved_places_source: google_maps  # or apple_maps / none
+gmaps_data_dir: "/Users/yourname/gmaps-sync/data"
+gmaps_sync_script: "/Users/yourname/.claude/scripts/gmaps-sync.sh"
+gmaps_timestamp: "/Users/yourname/.claude/plugins/cache/.gmaps-sync-timestamp"
