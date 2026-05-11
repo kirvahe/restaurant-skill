@@ -2,7 +2,7 @@
 
 ## Context
 
-v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 5 files, 1,458 lines, 42 tests passed. Before closing the project, need a roadmap for two axes: (1) quality — making recommendations better, (2) scalability — making the skill easier to distribute, adapt, and extend.
+v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 8 files, ~1,700 lines. Before closing the project, need a roadmap for two axes: (1) quality — making recommendations better, (2) scalability — making the skill easier to distribute, adapt, and extend.
 
 ## Axis 1: Quality — making recommendations better
 
@@ -46,11 +46,11 @@ v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 5 files, 1,458 l
 
 ### 2.3 MCP server independence
 **Problem:** Requires specific web search MCP. Different users have different MCPs.
-**Iteration:** Abstract search layer — detect available MCP (Brave, Tavily, Exa, Perplexity) and adapt queries. Graceful fallback if no web search available (use only saved places + feedback-log).
+**Iteration:** Abstract search layer — detect available MCP (Exa, Firecrawl, or any web search tool) and adapt queries. Graceful fallback if no web search available (use only saved places + feedback-log). ✓ Shipped in v1.0.
 
 ### 2.4 Multi-user profiles
 **Problem:** One profile per install. Couples with different tastes can't share.
-**Iteration:** Named profiles in config.yml (`profiles: [me, partner]`). Switch with `/restaurant --profile partner`. Shared feedback-log with per-profile ratings.
+**Iteration:** Named profiles in config.yml (`profiles: [kirvahe, nastya]`). Switch with `/restaurant --profile nastya`. Shared feedback-log with per-profile ratings.
 
 ### 2.5 Skill template framework
 **Problem:** The pattern (taste profile + onboarding + search + record + analyze) is reusable but locked to restaurants.
@@ -98,17 +98,40 @@ v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 5 files, 1,458 l
 | 2.9 i18n | Medium | High | v2.0 |
 | 2.10 Analytics dashboard | Low | High | v2.0 |
 
-## v1.0 (shipped)
-- ✓ Calibration loop (1.1)
-- ✓ Recommendation debrief (1.2)
-- ✓ One-command install (2.1)
-- ✓ MCP server independence (2.3)
-- ✓ Error handling / resilience section
-- ✓ Intent-based routing (replaces keyword matching)
-- ✓ SKILL.md simplified from 366 → 260 lines
+## Released
 
-## v1.1 target (next iteration)
+### v1.2 (2026-05-11) — shipped
+- ✓ Google Maps sync automation (2.7) — background TSV sync, cuisine→list matching
+- ✓ Multi-round search — round detection, persistent exclusion list, Mentioned section
+- ✓ Modular references/ folder — 5 conditional modules
+- ✓ evals/ smoke-test framework
+- ✓ Occasion taxonomy inference (7 occasions)
+- ✓ Wine integration (1.3) — Raisin.digital integration for natural wine
+- ✓ Chef story as search criterion
+- ✓ Source confidence A/B/C tiers + tourist-bias annotation
+- ✓ `--skill-dir` flag in install.sh (test/prod isolation)
+- ✓ See [CHANGELOG.md](CHANGELOG.md) for full details
+
+### v1.1 (folded into v1.2 release) — shipped
+- ✓ CE review hardening: install safety, correctness, PII protection
+- ✓ `.gitignore` for repo + auto-deployed in data_dir
+- ✓ LICENSE (MIT)
+- ✓ install.sh argument-parsing guards
+- ✓ Targeted uninstall (preserves `config.yml`)
+- ✓ Template placeholder detection (HTML-comment-aware)
+
+### v1.0 — shipped
+- ✓ Resilience, calibration, MCP independence, simplification
+- ✓ See [CHANGELOG.md](CHANGELOG.md) for full details
+
+### v0.9 — public beta
+- ✓ Initial release
+
+## v1.3 target (next iteration)
+- Recommendation debrief loop refinement (1.2 — partial)
 - Seasonal recommendations (1.5)
 - City learning (1.6)
-- Local critics refresh process (2.6)
-- Skill template framework (2.5)
+- Source credibility tracking (1.7)
+- Multi-user profiles (2.4)
+- evals harness (run the spec, not just document it)
+- Split `evals/` from runtime install path (dev-only)
