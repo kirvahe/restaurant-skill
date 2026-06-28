@@ -34,6 +34,10 @@ v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 8 files, ~1,700 
 **Problem:** All sources weighted equally. Reddit tip could be gold or garbage.
 **Iteration:** Track which sources led to high-rated visits. After 20+ visits: "Reddit-sourced places average 8.2, Michelin-sourced average 7.1 for you." Adjust search priority accordingly.
 
+### 1.8 Ask before assuming result-gating constraints
+**Problem:** The skill silently invents hard filters the user never stated, then enforces them as dealbreakers — most damagingly day/time. Real incident (Milan, 2026-06-05): across 5 search rounds the skill assumed "weekday lunch (Mon–Fri)" and used it as a dealbreaker, excluding venues that serve lunch only on weekends. The user's lunch was actually Saturday; the assumption silently killed the eventual user pick (Fratelli Torcinelli, Sat lunch) and the agent-flagged "textbook Trippa-format" Osteria Fiaschetto (Sat–Sun lunch only). The user had to point out they'd said "tomorrow" (= Saturday) and that the skill never asked.
+**Iteration:** Before any search, detect constraints that materially gate the candidate set — primarily **specific day + service (lunch/dinner) + time**, also hard budget ceilings and party size. If unstated and outcome-changing, ASK one targeted question rather than defaulting (esp. never default "lunch" → "weekday"). Weekday-vs-weekend flips the entire field (weekend-only-lunch venues, Sunday closures, weekday business-lunch menus). Tie into occasion-taxonomy: each occasion declares which constraints are result-gating and must be elicited vs safely inferred. When a candidate is excluded by a day/time filter, prefer annotating it ("lunch only Sat–Sun — confirm your day") over silently dropping it.
+
 ## Axis 2: Scalability — distribution, adaptation, extension
 
 ### 2.1 One-command install
@@ -90,6 +94,7 @@ v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 8 files, ~1,700 
 | 2.6 Local critics refresh | Medium | Medium | v1.1 |
 | 1.3 Wine integration | Medium | Medium | v1.2 |
 | 1.7 Source credibility | High | Medium | v1.2 |
+| 1.8 Ask before assuming gating constraints | High | Low | v1.4 |
 | 2.4 Multi-user profiles | Medium | Medium | v1.2 |
 | 2.7 Google Maps automation | Medium | High | v1.2 |
 | 1.4 Negative calibration | Low | Medium | v2.0 |
@@ -99,6 +104,16 @@ v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 8 files, ~1,700 
 | 2.10 Analytics dashboard | Low | High | v2.0 |
 
 ## Released
+
+### v1.3 (2026-06-28) — shipped
+- ✓ Reconcile deployed copy back into version control (5 hand-edited improvements were untracked)
+- ✓ LANGUAGE RULE block — user-facing output in request language
+- ✓ Madrid Secreto mandatory source (CCAA Madrid)
+- ✓ Hybrid tool routing — Exa for Reddit/editorial/semantic, Firecrawl for structured lookups + URL scrape
+- ✓ Google Maps Status filtering — skip permanently_closed, flag temporarily_closed
+- ✓ restaurant-capsule.md wired into occasion matching
+- ✓ Fixes: restored `version:` frontmatter, local-critics count 30 → 31
+- ✓ See [CHANGELOG.md](CHANGELOG.md) for full details
 
 ### v1.2 (2026-05-11) — shipped
 - ✓ Google Maps sync automation (2.7) — background TSV sync, cuisine→list matching
@@ -127,7 +142,8 @@ v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 8 files, ~1,700 
 ### v0.9 — public beta
 - ✓ Initial release
 
-## v1.3 target (next iteration)
+## v1.4 target (next iteration)
+- Ask before assuming result-gating constraints (1.8) — day/time/budget elicitation, never default "lunch"→"weekday"
 - Recommendation debrief loop refinement (1.2 — partial)
 - Seasonal recommendations (1.5)
 - City learning (1.6)

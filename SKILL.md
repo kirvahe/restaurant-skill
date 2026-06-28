@@ -2,8 +2,21 @@
 name: restaurant
 description: Find restaurants, bars, wine bars, and cocktail bars matching taste profile. This skill should be used when the user asks for restaurant, bar, wine bar, or cocktail bar recommendations, wants to rate a visited place, or asks to analyze dining patterns. Triggers on food/drink venue recommendations, "where to eat", "want a drink", "bar", "wine", "cocktails", city names with food/drink context.
 argument-hint: [city mood/type]
-version: "1.2.1"
+version: "1.3"
 ---
+
+## LANGUAGE RULE — RESPONSE LANGUAGE = REQUEST LANGUAGE (НЕНАРУШАЕМО)
+
+**ALL user-facing output is in the language of the user's request. Russian request → Russian answer. English request → English answer.**
+
+This applies to EVERYTHING shown to the user, with NO exceptions:
+- Chat prose (Overview, card descriptions, notes)
+- Inline blocks (★ Insight, summaries, explanations)
+- Saved `recommendations/*.md` files
+
+Internal data files stay in English regardless of request language: `taste-profile.md`, `feedback-log.md`, `cities/*.md`, `config.yml`, `MEMORY.md`. File and folder NAMES are always ASCII-English. But everything the user reads = request language. No English fragments inside a Russian conversation, no mixing.
+
+If you catch yourself drafting user-facing text in a language different from the request — STOP and rewrite. See `~/.claude/CLAUDE.md` (LANGUAGE RULES) and memory `feedback_output_language_match.md`.
 
 ## Setup
 
@@ -24,7 +37,7 @@ On first use, Claude must check if the skill is configured:
 Created during onboarding. Contains:
 
 ```yaml
-version: "1.2.1"
+version: "1.1"
 home_city: Berlin                                          # set during onboarding
 home_address: "Musterstrasse 42"
 data_dir: "/Users/yourname/Documents/restaurant-data"
@@ -46,6 +59,7 @@ All paths relative to `data_dir` from config.yml:
 | `feedback-log.md` | Visit log, /10 scale — rating scale and entry format defined here |
 | `cities/{city}.md` | City recommendation caches |
 | `recommendations/` | Saved recommendation outputs |
+| `restaurant-capsule.md` | 25-slot "go-to" picks by occasion (optional). When present and filled, consult during Find-a-spot to surface a proven anchor alongside fresh search |
 | `google-maps-data.md` | Index of all Google Maps saved lists (symlink to gmaps_data_dir). Read to discover available lists |
 
 **Google Maps data** (lives at `gmaps_data_dir` from config.yml):
@@ -89,6 +103,7 @@ Single-shot searches create ONLY standard sections. Multi-round sections appear 
 
 ### Web search failure:
 - If primary search tool returns error or empty results → try fallback tool (see Search tool detection below).
+- **Site-specific rejection** (e.g. Firecrawl returns "We do not support this site" — happens on Reddit): do NOT drop the source. Immediately retry via Exa (`mcp__exa__web_search_exa` or `mcp__exa__web_fetch_exa`). Reddit is a top-priority source — never abandon it because Firecrawl can't scrape it. A scrape/tool error counts as a primary-tool failure and triggers fallback, same as an empty result.
 - If ALL search tools fail → use training knowledge only. Add to Overview: "Web search unavailable — recommendations based on training data only. Verify independently."
 - Never silently degrade. If any data source was unavailable, state which one and what was skipped.
 
@@ -116,6 +131,8 @@ If `gmaps_timestamp` file doesn't exist → run sync script in background, proce
 Default mode is **Find a spot.** Switch only when confident the user intends Record or Analyze.
 
 For Find a spot, infer the **occasion** from query language before scoring candidates. The occasion materially changes which candidates rank well — a date-night search and a quick-solo-lunch search produce different recommendations even from the same taste profile. See `references/occasion-taxonomy.md` for the 7-occasion model and inference rules.
+
+After inferring the occasion, check `restaurant-capsule.md` (if it exists and the matching slot is filled): a capsule pick is a user-confirmed go-to for exactly this kind of outing, so surface it as an anchor candidate alongside fresh search results — clearly, and never to the exclusion of new discovery. The capsule is an accelerator, not a replacement for searching. If the file is missing or the relevant slot is empty, skip silently.
 
 **Record a visit** — user is reporting on a place they already went to.
 Signals: past tense, gives a rating, evaluates a specific place, mentions what they ordered.
@@ -165,7 +182,7 @@ Reference restaurants from the profile are internal calibration — NEVER mentio
 These are defaults. User's taste-profile.md overrides them.
 
 ### Trusted (use these)
-Reddit (city subs, diaspora) · Conde Nast Traveller · Eater · The Infatuation · Monocle · Gambero Rosso · OAD · Noble Rot · Punch (drinks) · La Liste · Gault & Millau · Raw Wine · Wine Spectator (wine lists) · Serious Eats · Vittles · Fare Magazine · Raisin (natural wine) · Michelin Guide (Bib Gourmand, recs) · World's 50 Best · Google Maps
+Reddit (city subs, diaspora) · Conde Nast Traveller · Eater · The Infatuation · Monocle · Gambero Rosso · OAD · Noble Rot · Punch (drinks) · La Liste · Gault & Millau · Raw Wine · Wine Spectator (wine lists) · Serious Eats · Vittles · Fare Magazine · Raisin (natural wine) · Michelin Guide (Bib Gourmand, recs) · World's 50 Best · Google Maps · Madrid Secreto (madridsecreto.co — CCAA Madrid only)
 
 **Local critics:** For every recommendation, look up the target country in `local-critics.md` (31 countries, named critics, publications, dominant platforms).
 
@@ -176,13 +193,15 @@ TripAdvisor · Yelp · TheFork · Instagram · Tourist guides · AI-generated li
 
 ## Search Rules
 
-### Search tool detection
-On first search of session, check available tools in this priority order:
-1. `mcp__exa__web_search_exa` (semantic — best for editorial/Reddit)
-2. `mcp__firecrawl__firecrawl_search` (web — best for structured extraction)
-3. Built-in WebSearch/WebFetch (limited, no site: filtering)
-4. None available → Degraded Mode (see Resilience section)
-Cache the selected tool for the session. Re-detect only on error.
+### Search tool detection — route by query type (hybrid)
+There is no single "primary" tool. The project routing rule `.claude/rules/web_search.md` is a per-task-type table, not a blanket preference — honor it by picking the tool by what the query actually needs:
+
+- **Exa** (`mcp__exa__web_search_exa` / `mcp__exa__web_fetch_exa`) → Reddit (ALWAYS — Firecrawl cannot scrape Reddit), editorial/diaspora consensus, and semantic discovery ("places similar to X", "natural-wine bars like Y"). This is the bulk of restaurant discovery.
+- **Firecrawl** (`mcp__firecrawl__firecrawl_search` / `firecrawl_scrape`) → structured local-business lookups (exact address, opening hours, "near me"), scraping a specific known URL (a venue's own site, a Michelin page), and Madrid Secreto category pages.
+- **Built-in WebSearch/WebFetch** → last resort only (no site: filtering).
+- None available → Degraded Mode (see Resilience section).
+
+Reddit is a top-priority source queried 3×/cuisine, and Firecrawl returns "We do not support this site" on it — so route Reddit straight to Exa instead of wasting a Firecrawl call first. Cache the tool chosen per purpose for the session; re-detect only on error.
 
 ### Language rule — search in up to 3 languages:
 1. Country language FIRST — local critics are strongest
@@ -192,6 +211,8 @@ Cache the selected tool for the session. Re-detect only on error.
 - {Cuisine} in another country: country language > EN > cuisine language
 
 ### Reddit: always 3 queries per cuisine — country language + cuisine language + English. Include diaspora communities for ethnic cuisines (diaspora knows authenticity better than locals).
+
+### Madrid Secreto (madridsecreto.co): MANDATORY for every search where target city is Madrid OR anywhere in Comunidad de Madrid (Alcalá de Henares, Aranjuez, Chinchón, San Lorenzo de El Escorial, etc.). Same enforcement level as Reddit — never skip, regardless of cuisine or occasion. Search `site:madridsecreto.co {cuisine OR neighborhood OR query}` via Exa/Firecrawl, or fetch a relevant category page directly. Strong local editorial signal for hidden gems, neighborhood scenes, and trend spots. A positive mention on Madrid Secreto counts as one of the 2+ independent validations required by the Validation rule below.
 
 ### Raisin (raisin.digital): ALWAYS check for wine bar / natural wine searches. Search `raisin.digital {city}` or fetch `raisin.digital/en/explore/{country}/{region}/{city}/`. Cross-reference every candidate against Raisin — presence on Raisin is a strong quality signal for natural/organic/biodynamic wine venues.
 
@@ -207,7 +228,7 @@ When continuing a previous search (Round 2+):
 
 ### Quality: minimum 4 queries, target 6-8. If < 5 candidates → second round with different patterns. Better 2 strong picks than 3 mediocre ones — never pad with weak options.
 
-### Priority: Reddit → Raisin (for wine) → local critics (from `local-critics.md`) → Conde Nast / Eater → Michelin → fresh articles (last 2 years)
+### Priority: Reddit → Madrid Secreto (CCAA Madrid only) → Raisin (for wine) → local critics (from `local-critics.md`) → Conde Nast / Eater → Michelin → fresh articles (last 2 years)
 
 ### Validation: reliable if mentioned in 2+ independent sources, OR detailed Reddit review with specifics, OR Michelin rec.
 
@@ -230,7 +251,8 @@ When `saved_places_source` is not `none` and `gmaps_data_dir` is set in config:
 
 **Step 2 — Grep TSV files for candidates:**
 - Use Grep tool on each relevant TSV file. TSV format: `Name\tRating\tReviews\tType\tStatus`
-- EVERY place from the user's thematic list is a candidate — do not skip by rating or brand association
+- **Respect the Status column.** Never recommend a place whose Status is `permanently_closed` — drop it from candidates entirely. For `temporarily_closed`, include only if it's a strong match and tag it explicitly "(temporarily closed — verify before going)". `open` or empty → normal candidate. Do NOT delete closed rows from the TSV files: the scraper regenerates them from Google Maps on each sync, so filtering must happen here at read time, not in the data.
+- EVERY open place from the user's thematic list is a candidate — do not skip by rating or brand association
 - Cross-check: in Favorites → priority candidate (user confirmed it's good). In feedback-log → already visited
 - If a group/brand is known for one format (pizza) but has another format (trattoria, bistro) → evaluate each format separately ("brand ≠ format" rule)
 - Family business with 2-4 locations is NOT a "chain". Chain = corporate (soulless, "for everyone")
@@ -288,17 +310,18 @@ A round transition happens when the user provides feedback on the current round'
 **{local currency} XX-YY for two** · caveat if any (reservation, unusual hours, etc.)
 
 > {Street address} · {distance from home if in home city}
-> [Google Maps](https://www.google.com/maps/search/{Name+City}) · {Rating} ({N reviews}{tourist-bias annotation if triggered}) · **Sources:** [{tier}] {source list}
+> [Google Maps](https://www.google.com/maps/search/{Name+Street+City, ASCII, spaces as +}) · {Rating} ({N reviews}{tourist-bias annotation if triggered}) · **Sources:** [{tier}] {source list}
 ```
 
 The `[A]` / `[B]` / `[C]` tier prefix on the Sources line is mandatory — see `references/source-confidence.md`. The tourist-bias inline annotation (e.g., "(842 — likely tourist-inflated, treat as ~4.0)") fires only in tourist-heavy zones; same reference file defines the trigger conditions.
 
 ### Rules:
+- **LANGUAGE = REQUEST LANGUAGE** — all chat prose, card text, inline ★ Insight blocks, and the saved recommendation `.md` are written in the user's request language (see LANGUAGE RULE at top). Internal cache files stay English. No mixing.
 - NO labels (strong pick / solid / speculative) — sorting does the job
 - NO comparisons to reference restaurants
 - NO italic (unreadable in terminal)
 - NEVER start a line with `~` (renders as strikethrough in Claude Code)
-- Google Maps link: always `https://www.google.com/maps/search/{Name+City}`
+- Google Maps link: always `https://www.google.com/maps/search/{Name+Street+City}` (path form, no query params). Use ASCII only (strip accents: Dongiò → Dongio), spaces as `+`, include the street so the pin resolves to the exact venue, not a fuzzy name match. (Note: a link opening two browser tabs is a Warp terminal Cmd+Click behavior, not a URL-format issue — not fixable from link formatting.)
 - For home city: include neighbourhood + distance from home address
 - `---` between cards
 
@@ -333,7 +356,9 @@ Labels (strong pick / speculative / ✅ / ⚠️ / ❌) remain FORBIDDEN in all 
 
 Round history lives in `cities/{city}.md`, not in the recommendation file. This keeps the recommendation file clean and actionable.
 
-**Always end with the .md file link** — every response (find, record, analyze) must finish with a link to the saved/updated file.
+**Recommendations recap before the link** — the very END of every Find-a-spot response must be a compact recap list of the recommended places (name + one-line hook each, in recommendation order), placed immediately ABOVE the file link. The cards above can be scrolled past; this recap is the scannable takeaway. Meta/notes go above the recap; nothing goes between the recap and the file link except the link itself. See memory `feedback_results_before_link`.
+
+**Always end with the .md file link** — every response (find, record, analyze) must finish with a link to the saved/updated file. Order at the bottom of the message is strictly: recap list → file link (last line).
 
 ### Before outputting, cross-check each candidate against:
 - feedback-log (already visited? what rating?)
