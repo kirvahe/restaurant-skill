@@ -54,7 +54,7 @@ v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 8 files, ~1,700 
 
 ### 2.4 Multi-user profiles
 **Problem:** One profile per install. Couples with different tastes can't share.
-**Iteration:** Named profiles in config.yml (`profiles: [kirvahe, nastya]`). Switch with `/restaurant --profile nastya`. Shared feedback-log with per-profile ratings.
+**Iteration:** Named profiles in config.yml (`profiles: [kirvahe, partner]`). Switch with `/restaurant --profile partner`. Shared feedback-log with per-profile ratings.
 
 ### 2.5 Skill template framework
 **Problem:** The pattern (taste profile + onboarding + search + record + analyze) is reusable but locked to restaurants.

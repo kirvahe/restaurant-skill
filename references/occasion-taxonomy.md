@@ -32,7 +32,7 @@ Inspect the user's query for occasion signals BEFORE asking. Ask only when genui
 
 | Signal in query | Inferred occasion |
 |---|---|
-| "with wife / Nastya / couple / for two / anniversary" | date or celebration (further disambiguation: anniversary/birthday → celebration; default → date) |
+| "with wife / partner / couple / for two / anniversary" | date or celebration (further disambiguation: anniversary/birthday → celebration; default → date) |
 | "alone / solo / by myself / lunch break" | solo |
 | "for 4 / 5 / 6 / group / friends visiting / company dinner" | group |
 | "tonight before [event] / quick / fast / before train / lunch in 1 hour" | quick |
@@ -42,7 +42,7 @@ Inspect the user's query for occasion signals BEFORE asking. Ask only when genui
 
 ### When to ask
 
-If the inference is genuinely 50/50 (e.g., "восemь вечера в Чамбери" — could be casual solo or planned date), ask ONE short question:
+If the inference is genuinely 50/50 (e.g., "восемь вечера в центре" — could be casual solo or planned date), ask ONE short question:
 
 > Это под какой контекст? (1) спокойно вдвоём, (2) быстрый перекус, (3) исследую район?
 
@@ -59,7 +59,7 @@ The Overview line at the top of every recommendation output should explicitly st
 ```markdown
 ## Overview
 
-**Occasion:** date dinner in Chamberí (Friday evening, ambiance + reservation prioritized)
+**Occasion:** date dinner in your neighbourhood (Friday evening, ambiance + reservation prioritized)
 ...
 ```
 
@@ -67,6 +67,6 @@ If the user disagrees with the inferred occasion, they can correct it and the se
 
 ## Multi-occasion contexts
 
-Some queries blend occasions ("celebrate Nastya's birthday with our friends" = celebration + group). Apply both modifier sets and composite. Up-weights stack; down-weights take the most restrictive.
+Some queries blend occasions ("celebrate a birthday with friends" = celebration + group). Apply both modifier sets and composite. Up-weights stack; down-weights take the most restrictive.
 
 Travel queries (city != home_city) default to `explorer` unless the query has an explicit occasion signal — exploration is the usual reason for being there.

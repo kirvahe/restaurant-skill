@@ -27,7 +27,7 @@ Every recommendation in output gets a tier prefix on its Sources line:
 Tier prefix appears at the START of the Sources line in each card:
 
 ```
-> Calle de Bretón de los Herreros, 54 · 500m from home
+> Example St 12 · 500m from home
 > [Google Maps](https://maps.google.com/...) · GM 4.5 (1,600+) · **Sources:** [A] Pepe Rodríguez interview (El Comidista 2024) + Michelin Bib Gourmand 2026
 ```
 
