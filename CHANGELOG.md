@@ -7,6 +7,26 @@ Note: entries for v0.9.0, v1.0, and v1.1 were backfilled retroactively on 2026-0
 
 ## [Unreleased]
 
+## [v1.3] — 2026-06-28
+
+Reconciles the live skill with the repo: several improvements that had been hand-edited into the deployed copy are now captured in version control, plus two new data-quality rules (closed-venue filtering, capsule wiring) and a clearer tool-routing model.
+
+### Added
+- **LANGUAGE RULE block** at the top of `SKILL.md` — all user-facing output (chat prose, inline blocks, saved `recommendations/*.md`) is written in the language of the user's request; internal data files stay English. No mixing.
+- **Madrid Secreto** (`madridsecreto.co`) as a MANDATORY source for any search in Madrid / Comunidad de Madrid — same enforcement level as Reddit, counts toward the 2+ independent-validation rule.
+- **Google Maps Status filtering** — `permanently_closed` venues are dropped from candidates; `temporarily_closed` are surfaced only on a strong match and tagged "verify before going". Filtering happens at read time (survives re-sync); TSV rows are never edited.
+- **`restaurant-capsule.md` wiring** — the 25-slot "go-to" picks file is now consulted during Find-a-spot (after occasion inference) as an optional anchor; previously the file existed but the skill never read it.
+
+### Changed
+- **Tool routing → hybrid split** (replaces the single-"primary" model). Route by query type: Exa for Reddit/editorial/diaspora/semantic discovery (Reddit always via Exa — Firecrawl can't scrape it), Firecrawl for structured local-business lookups, specific-URL scrapes, and Madrid Secreto category pages.
+- **Reddit resilience** — a Firecrawl "We do not support this site" rejection on Reddit now counts as a primary-tool failure and immediately retries via Exa.
+- **Google Maps link format** — `Name+Street+City`, ASCII only (accents stripped), street included so the pin resolves to the exact venue.
+- **Recommendations recap** — every Find-a-spot response ends with a compact recap list immediately above the file link.
+
+### Fixed
+- Restored the `version:` field to the `SKILL.md` frontmatter (was dropped in a hand-edit).
+- Corrected `local-critics.md` country count in prose: 30 → **31** (matches the actual file).
+
 ## [v1.2.1] — 2026-05-11
 
 Adds automatic updates via a SessionStart hook. After running `./install.sh` once with this version, future releases install themselves silently every 24 hours — no terminal commands required. Skill content is identical to v1.2.
