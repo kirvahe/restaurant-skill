@@ -18,8 +18,8 @@ Every recommendation in output gets a tier prefix on its Sources line:
 
 | Tier | Definition | Examples |
 |---|---|---|
-| **[A]** | Chef-cited (named chef recommends in interview) OR editorial consensus (≥2 independent editorial sources: Eater + Infatuation, or Michelin Bib + local critic) | Cañabota in chef interview by Pepe Rodríguez; Bib Gourmand + Guía Repsol Solete |
-| **[B]** | Single editorial source (one trusted publication or critic) OR strong local Reddit consensus (multiple specific recommendations with details) OR Raisin/Star Wine List for wine bars | Eater Madrid 38; r/madrid thread with 3 detailed recommendations |
+| **[A]** | Chef-cited (named chef recommends in interview) OR editorial consensus (≥2 independent editorial sources: Infatuation + local critic, or Michelin Bib + local critic) | Cañabota in chef interview by Pepe Rodríguez; Bib Gourmand + Guía Repsol Solete |
+| **[B]** | Single editorial source (one trusted publication or critic) OR strong local Reddit consensus (multiple specific recommendations with details) OR Raisin/Star Wine List for wine bars | Eater Barcelona 38 (current list); r/madrid thread with 3 detailed recommendations |
 | **[C]** | Google Maps signal only OR aggregator-derived (TripAdvisor mentioned, etc.) OR single Reddit comment | Random GM 4.6 (1,200 reviews) with no editorial trace |
 
 ## Output format — where the tier appears
@@ -39,6 +39,26 @@ vs.
 ```
 
 The tier is informational, not blocking. A [C] candidate can still be recommended if it's the right fit, but the user knows the confidence level at a glance and can choose accordingly.
+
+## Two sources need sub-rules, because their own badges differ in reliability
+
+### Guía Repsol — the award's origin matters more than the award
+
+Not all Soletes carry equal weight. The API exposes which route produced the award, so use it:
+
+| Route | Tier contribution |
+|---|---|
+| Inspector-awarded Solete or Sol | Counts as one editorial source → [B] alone, [A] with a second independent source |
+| Chef-sourced (`cocineros;` filter, or "Donde comen los cocineros") | Chef-cited → [A] on its own, same as a chef interview |
+| Celebrity-sourced (`famosos;` filter) | Does **not** count toward a tier. A celebrity Solete is a personal pick by a public figure, not an inspected award |
+
+Independent of route: an award is evidence the venue **was** judged good, not that it currently is. Soles are rarely revoked, and the 2025 edition made 400 visits against a 618-venue list. A Repsol award never substitutes for the open-status check.
+
+### Eater — a stale list is not an editorial source
+
+Eater only reaches [B] when both conditions hold: the city is one of the 9 Eater actually maintains as of July 2026 (Paris, London, Barcelona, Lisbon, Rome, Tokyo, Mexico City, Vancouver, Montreal), **and** the page passes the freshness gate — `article:modified_time` differs from `article:published_time` *and* is under ~12 months old.
+
+A page that fails either test contributes nothing — not [C], nothing. It is not a weak signal, it is an unverified one: 31 of Eater's 47 international lists have never been revisited since commission, and their publication dates make them look current when they are not. Treating a frozen list as a weak editorial vote is exactly how a venue that closed years ago enters a recommendation.
 
 ## Tourist-bias annotation
 

@@ -94,7 +94,7 @@ v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 8 files, ~1,700 
 | 2.6 Local critics refresh | Medium | Medium | v1.1 |
 | 1.3 Wine integration | Medium | Medium | v1.2 |
 | 1.7 Source credibility | High | Medium | v1.2 |
-| 1.8 Ask before assuming gating constraints | High | Low | v1.4 |
+| 1.8 Ask before assuming gating constraints | High | Low | v1.5 |
 | 2.4 Multi-user profiles | Medium | Medium | v1.2 |
 | 2.7 Google Maps automation | Medium | High | v1.2 |
 | 1.4 Negative calibration | Low | Medium | v2.0 |
@@ -142,7 +142,7 @@ v0.9 public beta shipped (github.com/kirvahe/restaurant-skill). 8 files, ~1,700 
 ### v0.9 — public beta
 - ✓ Initial release
 
-## v1.4 target (next iteration)
+## v1.5 target (next iteration)
 - Ask before assuming result-gating constraints (1.8) — day/time/budget elicitation, never default "lunch"→"weekday"
 - Recommendation debrief loop refinement (1.2 — partial)
 - Seasonal recommendations (1.5)

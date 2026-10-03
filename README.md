@@ -131,7 +131,7 @@ cp feedback-log-template.md ~/Documents/restaurant-data/feedback-log.md
 Create `~/.claude/skills/restaurant/config.yml`:
 
 ```yaml
-version: "1.2"
+version: "1.4"
 home_city: Berlin
 home_address: "Musterstrasse 42"
 data_dir: "/Users/yourname/Documents/restaurant-data"
@@ -153,6 +153,7 @@ Fill in `taste-profile.md` — replace HTML comments with your answers.
     hidden-gems.md             #   Under-the-radar slot mandate
     occasion-taxonomy.md       #   7-occasion inference model
     onboarding-blocks.md       #   Full 7-block onboarding protocol
+    guia-repsol.md             #   Guía Repsol API spec + trust guardrails
   evals/                       # Smoke-test eval prompts
     evals.md
 
@@ -176,14 +177,14 @@ Every visit you record recalibrates future recommendations. After enough visits,
 |---|---|
 | SKILL.md | Core skill: search rules, output format, onboarding, resilience |
 | local-critics.md | Editorial food sources for 31 countries (named critics, publications, platforms) |
-| references/ | Five modular docs: visit protocol, source confidence (A/B/C tiers), hidden gems, occasion taxonomy (7 occasions), onboarding blocks |
+| references/ | Six modular docs: visit protocol, source confidence (A/B/C tiers), hidden gems, occasion taxonomy (7 occasions), onboarding blocks, Guía Repsol access spec |
 | evals/evals.md | Smoke-test prompts for regression testing after refactors |
 | taste-profile-template.md | Empty taste profile with all sections and guidance comments |
 | feedback-log-template.md | Visit log template with rating scale and entry format |
 | cities-template.md | Template for city recommendation caches |
 | config.yml.example | Reference config with all keys documented (`gmaps_*` keys optional) |
 | install.sh | One-command installer with `--skill-dir`, `--data-dir`, `--uninstall` flags |
-| CHANGELOG.md | Version history (v0.9 → v1.2) |
+| CHANGELOG.md | Version history (v0.9 onward) |
 
 ## Credits
 

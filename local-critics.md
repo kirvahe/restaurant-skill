@@ -14,7 +14,7 @@
 
 | Source | Type | Best for | Language | Active |
 |---|---|---|---|---|
-| **Guia Repsol** | National guide (1-3 Soles rating) | Broad, fine dining to casual | Spanish | Yes -- 2026 edition out, 808 restaurants rated |
+| **Guia Repsol** | National guide — two systems: 1-3 Soles (808 restaurants) + Soletes (5,500+ casual). Open API — see `references/guia-repsol.md` | Broad; Soletes are the casual/taberna layer Michelin ignores | Spanish | Yes -- 2026 edition; Soletes republished 2-4x/year |
 | **Michelin Guide Spain & Andorra** | International guide | Fine dining | Spanish/English | Yes -- 2026 edition |
 
 #### Newspaper Critics
@@ -30,6 +30,8 @@
 | Source | Type | Best for | Language | Active |
 |---|---|---|---|---|
 | **7 Canibales** (7canibales.com) | Digital magazine | Broad, editorial | Spanish | Yes |
+| **ComerJapones** (comerjapones.com) | Specialist blog + venue finder | Japanese cuisine ONLY -- udon, soba, tempura, izakaya, katei ryori; names the dish to order | Spanish | Yes -- finder current, long-form reviews often 2007-2012 |
+| **profundidad.net** (Luis Rodriguez, founder of Japonismo.com) | Personal blog | Japan-specialist; MA in contemporary Japan studies | Spanish | Yes -- and keeps closure updates current on old posts |
 | **Tapas Magazine** (tapasmagazine.es) | Digital magazine | Broad, trends, interviews | Spanish | Yes |
 | **GastroActitud** (gastroactitud.com) | Online portal | Broad, news | Spanish | Yes -- 2.5M+ visits/year |
 | **The Gourmet Journal** (thegourmetjournal.com) | Digital magazine | Fine dining, guide coverage | Spanish | Yes |
