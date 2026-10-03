@@ -7,6 +7,35 @@ Note: entries for v0.9.0, v1.0, and v1.1 were backfilled retroactively on 2026-0
 
 ## [Unreleased]
 
+## [v1.4] — 2026-10-03
+
+Adds new source rules, a richer visit protocol and stricter data-quality checks, and reorganises the skill along Anthropic's skill-authoring best practices. The reorganisation moves material between files; it does not change what the existing rules require.
+
+### Added
+- **Guía Repsol** as a MANDATORY source for Spain, Portugal and Andorra, with `references/guia-repsol.md` (API access via Bash + curl, filter vocabulary, URL patterns, trust guardrails). `references/source-confidence.md` weights inspector-, chef- and celebrity-sourced awards differently.
+- **ComerJapones** as a MANDATORY source for Japanese cuisine in Spain; ComerJapones and profundidad.net added to the Spain section of `local-critics.md`.
+- **Home-country business press** rule for ethnic-cuisine searches that conclude "this format does not exist here", with a MANDATORY closure check and a rule against treating delivery-platform or menu-aggregator pages as proof that a venue is open.
+- **Diaspora-language Q&A boards** as a MANDATORY layer for ethnic-cuisine searches outside the cuisine's home country.
+- **Context frames** and **provenance modifiers** in `references/visit-protocol.md`: each rating records what it was measured against, and the user's number is never adjusted.
+- Separate `visited` / `logged` dates in feedback-log entries.
+- `references/worked-failures.md` — the worked cases and dated source notes behind the business-press, diaspora-board and Eater rules.
+- Tables of contents in `local-critics.md`, `references/guia-repsol.md` and `references/visit-protocol.md`.
+
+### Changed
+- **Eater** is used only for the cities it actively maintains, and only after a freshness gate on the page's modified/published dates; a stale list contributes nothing to a candidate's source tier.
+- **Google Maps cross-check** matches on normalised names, runs a direct grep for short names, and verifies every finalist individually before the card is written.
+- Every venue name in every table is a Google Maps link.
+- `Company` and `Ordered` are back in the feedback-log entry format; the feedback-log template uses the behaviour-based tier definitions.
+- Recording or analysing visits no longer computes a log-wide average or by-city/axis/type distributions. The template's `## Statistics` block is now `## Reference`, and the periodic drift scan is removed (kept as an old pattern in `references/visit-protocol.md`).
+- `SKILL.md` restructured for progressive disclosure: worked examples, rationale and dated notes from Search Rules moved to `references/worked-failures.md`, each replaced by a pointer that says when to read it. Every reference file, including `guia-repsol.md`, is now listed in `SKILL.md`.
+- MCP tool names are fully qualified (`mcp__exa__…`, `mcp__firecrawl__…`), with a note that the server prefix can differ between installations.
+- A project search-routing rules file is honoured when present; without one, the skill's own routing applies.
+- Russian signal phrases sit beside the English ones in the Context-frames table.
+- Version set to 1.4 in `SKILL.md`, `config.yml.example` and the README; the ROADMAP's next target is now v1.5.
+
+### Fixed
+- In `references/guia-repsol.md`, the `poisMap` warning sat inside the bash code block; it is now regular text.
+
 ## [v1.3] — 2026-06-28
 
 Reconciles the live skill with the repo: several improvements that had been hand-edited into the deployed copy are now captured in version control, plus two new data-quality rules (closed-venue filtering, capsule wiring) and a clearer tool-routing model.

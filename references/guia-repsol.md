@@ -4,6 +4,18 @@ Spain's national restaurant guide. Access spec, filter vocabulary, and trust gua
 
 *Compiled 2026-07-28. All endpoints, parameters, and URL patterns below were verified by live request. Anything unverified is marked ⚠️.*
 
+## Contents
+- Why this source exists in the skill
+- Two award systems — do not conflate (Soles vs Soletes, criteria, thematic editions)
+- Access — API (primary path): endpoints, two-step lookup, `POST /poi/map` body, no pagination, `GET /poi/{id}`
+- Filter vocabulary (`GET /explore/tags`): `calificacion;`, `tipoEstablecimiento;`, `tipoCocinaRte;`, `servicios;`, `cocineros;`, `famosos;`, `rango;`, verified filter results
+- URL patterns (HTML side — fetch with Firecrawl)
+- Per-venue fields — API vs HTML
+- Search fallback (when Bash/curl is unavailable, or the API changes)
+- Editorial sections worth reading
+- Geographic coverage (incl. the Andorra location trap)
+- Guardrails — apply all three; honest caveats on the source itself
+
 ## Why this source exists in the skill
 
 Repsol rates categories Michelin does not touch at all — chiringuitos, heladerías, market stalls, vinotecas, coctelerías, *fast good*, sidrerías — and it rescues Spanish classics Michelin persistently ignores (Lera, Sacha, Horcher, La Tasquita, Los Marinos José hold Soles but never a star).
@@ -49,7 +61,7 @@ Content-type: application/json; charset=UTF-8
 
 The API host is **not** behind Akamai — plain `curl` works. `www.guiarepsol.com` **is** Akamai-protected: plain curl and WebFetch both get 403, including `/robots.txt` and `/sitemap.xml`. Use Firecrawl for any HTML page.
 
-Because `POST /poi/map` is a POST, the standard scrape/fetch tools (Firecrawl scrape, Exa web_fetch, WebFetch) cannot reach it — they issue GET. The API path requires Bash + curl. When Bash is unavailable, fall back to the search path below.
+Because `POST /poi/map` is a POST, the standard scrape/fetch tools (`mcp__firecrawl__firecrawl_scrape`, `mcp__exa__web_fetch_exa`, built-in WebFetch) cannot reach it — they issue GET. The API path requires Bash + curl; the examples below pipe the JSON through `jq`. When Bash is unavailable, fall back to the search path below.
 
 ### Endpoints
 
@@ -78,9 +90,9 @@ curl -s -X POST "https://guia-app-api.cloudapp.repsol.com/poi/map" \
   -H "Content-type: application/json; charset=UTF-8" \
   -H "currentSite: es" \
   -d '{"tagIds":["calificacion;S"],"locationId":"ChIJFf5oO_6vUQ0RSUaGlFnFPuQ"}' | jq -r '.poisMap[] | "\(.name) | \(.location) | \(.canonical)"'
+```
 
 ⚠️ **The response key is `poisMap`, not `data`.** `POST /poi/map` returns `{"poisMap":[...], "viewport":{...}}`; each entry carries `name`, `location`, `calification`, `canonical` and `id`. A `.data[]` jq filter silently yields nothing and reads exactly like "this city has no venues of that type" — which is how a whole search can be abandoned on a filter typo. `GET /search/{city}` is the one that uses `.locations.data[0].id`; the two endpoints do not share a shape. *(Verified September 2026.)*
-```
 
 ### `POST /poi/map` request body
 
@@ -262,12 +274,12 @@ Stack is Adobe AEM (server-rendered Java), not React/Next — there is no `__NEX
 site:guiarepsol.com/es/fichas/solete {type} {city}       ← path-scoped = Soletes only
 site:guiarepsol.com/es/fichas/restaurante {type} {city}  ← same for Soles
 site:guiarepsol.com soletes {theme} {city}               ← surfaces thematic routes
-firecrawl_map url=guiarepsol.com search="{terms}"        ← cheapest section enumeration
+mcp__firecrawl__firecrawl_map url=guiarepsol.com search="{terms}"   ← cheapest section enumeration
 ```
 
 Verified: `site:guiarepsol.com/es/fichas/solete vinoteca Bilbao` returned 6 real Bilbao Solete fichas with addresses in the snippets.
 
-⚠️ Plain `firecrawl_map` on the root is useless — 2,908 of 3,000 URLs were `/es/fichas/vino/` wine cards. Always pass `search=`.
+⚠️ Plain `mcp__firecrawl__firecrawl_map` on the root is useless — 2,908 of 3,000 URLs were `/es/fichas/vino/` wine cards. Always pass `search=`.
 
 ---
 

@@ -2,6 +2,16 @@
 
 How to capture a visit so the resulting feedback log entry is rich enough to drive future recommendations. This protocol replaces the older "place name + rating" capture for new entries; existing entries in `feedback-log.md` remain in their original format.
 
+## Contents
+- Why this exists (peak-end rule, confirmation bias)
+- Protocol — asymmetric question sequence (the 4-question batch)
+- Decimal scoring rule
+- Feedback-log entry template (date convention, `Company` and `Ordered`)
+- Context frames — what the number was measured against (+ provenance modifiers)
+- Calibration — tier definitions, drift detection (removed), format-specific anchor
+- Cache correction discipline
+- When the user gives only a rating
+
 ## Why this exists
 
 Two findings from cognitive science motivate the change:
@@ -78,17 +88,17 @@ The tier table below answers *how good was it*. It does not answer *good compare
 
 Record the frame in `Context:`. **Never adjust the user's number to normalise it.** The number is the user's; the frame is the metadata that makes it readable later.
 
-| Frame | Meaning | Signal in the user's wording |
+| Frame | Meaning | Signal in the user's wording (EN · RU) |
 |---|---|---|
-| `absolute` | Judged against a full option set in a real city. The default. | No qualifier given |
-| `rural` | Judged against what a small town or village can realistically deliver. The same food in a capital would score lower. | "good for a small town", "for what it is out here" |
-| `expectation-adjusted` | A star, a big name or a high price raised the bar. A mid number here means disappointment, not adequacy. | "for a starred place…", "at those prices…" |
-| `constrained` | The choice set was degraded — holiday closures, Sunday, late night, nothing else open. The venue was not really chosen on merit. | "it was the only thing open", "everything else was shut" |
-| `neighbourhood` | A local regular, judged with convenience priced in. Not a claim that it beats destination venues. | "our local", "round the corner from home" |
-| `composite` | The user gave two numbers — food alone and overall. Record both; the headline number is not a food score. | "food alone X, overall Y" |
-| `format-adjusted` | Judged as what it is — an aperitivo counter, a takeaway window — not as a restaurant. Structural ceiling, not a verdict. | "an aperitivo stop, not a dinner", "takeaway only" |
-| `occasion-specific` | Rated for one craving or occasion, not as an all-purpose venue. | "my go-to when I crave X" |
-| `memory` | Scored years after the visit. A durable emotional anchor, not current information about the venue. | "I was there years ago" |
+| `absolute` | Judged against a full option set in a real city. The default. | No qualifier given, in any language |
+| `rural` | Judged against what a small town or village can realistically deliver. The same food in a capital would score lower. | "good for a small town", "for what it is out here" · «для маленького городка отлично», «для такой глуши очень достойно» |
+| `expectation-adjusted` | A star, a big name or a high price raised the bar. A mid number here means disappointment, not adequacy. | "for a starred place…", "at those prices…" · «для ресторана со звездой…», «за такие деньги…» |
+| `constrained` | The choice set was degraded — holiday closures, Sunday, late night, nothing else open. The venue was not really chosen on merit. | "it was the only thing open", "everything else was shut" · «больше ничего не работало», «всё остальное было закрыто» |
+| `neighbourhood` | A local regular, judged with convenience priced in. Not a claim that it beats destination venues. | "our local", "round the corner from home" · «наше место рядом с домом», «в двух шагах от дома» |
+| `composite` | The user gave two numbers — food alone and overall. Record both; the headline number is not a food score. | "food alone X, overall Y" · «по еде X, в целом Y» |
+| `format-adjusted` | Judged as what it is — an aperitivo counter, a takeaway window — not as a restaurant. Structural ceiling, not a verdict. | "an aperitivo stop, not a dinner", "takeaway only" · «это скорее на аперитив, чем на ужин», «только навынос» |
+| `occasion-specific` | Rated for one craving or occasion, not as an all-purpose venue. | "my go-to when I crave X" · «хожу туда, когда хочется X» |
+| `memory` | Scored years after the visit. A durable emotional anchor, not current information about the venue. | "I was there years ago" · «был там много лет назад» |
 
 ### Provenance modifiers — how the number itself was produced
 
@@ -125,15 +135,23 @@ The /10 number reads against these definitions. Decimal granularity on 9.0+ rema
 
 ### Drift detection — removed in v1.4
 
-There is no periodic drift scan, and this is deliberate. The mechanism existed here from v1.2 until v1.4, and was removed because there was no good answer to what it was for.
-
-It asked three questions after every 15 visits, and its own closing instruction was *"present findings and let the user decide… Never auto-recalibrate"* — an observation with no action attached. Run against a real log, it produced a few lines of text and changed nothing. Two of its questions led nowhere. The third (*"is a format scoring 8+ but still tagged non-Top?"*) duplicated the cuisine calibration in `SKILL.md`, which does have an Apply y/n step and a file to write to.
-
-Its only input was the log-wide average, which pooled nine incompatible `Context` frames and therefore could not be read literally. The average has been removed from `feedback-log.md` for the same reason. A guard whose only job was to protect a number nobody could use.
+There is no periodic drift scan, and this is deliberate.
 
 What replaces it: **nothing aggregate.** The `Context:` field makes each rating readable on its own terms, with no cross-year comparison required, and the cuisine calibration in `SKILL.md` is where an actual profile change gets proposed.
 
 **Do not re-introduce a log-wide average or a drift scan.** If drift ever genuinely needs measuring, do it inside one frame (`absolute` only) and name the frame.
+
+#### Old patterns
+
+<details>
+<summary>Periodic drift scan and log-wide average (v1.2 – v1.3, removed in v1.4)</summary>
+
+The mechanism existed here from v1.2 until v1.4, and was removed because there was no good answer to what it was for.
+
+It asked three questions after every 15 visits, and its own closing instruction was *"present findings and let the user decide… Never auto-recalibrate"* — an observation with no action attached. Run against a real log, it produced a few lines of text and changed nothing. Two of its questions led nowhere. The third (*"is a format scoring 8+ but still tagged non-Top?"*) duplicated the cuisine calibration in `SKILL.md`, which does have an Apply y/n step and a file to write to.
+
+Its only input was the log-wide average, which pooled nine incompatible `Context` frames and therefore could not be read literally. The average has been removed from `feedback-log.md` for the same reason. A guard whose only job was to protect a number nobody could use.
+</details>
 
 ### Optional: format-specific anchor when a format has >= 5 entries
 

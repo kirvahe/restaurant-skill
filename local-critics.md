@@ -2,6 +2,16 @@
 
 *Compiled: 2026-03-18. Excludes aggregators (TripAdvisor, Yelp, TheFork, Google Maps), influencers, and tourist guides.*
 
+## Contents
+
+31 countries. Each country section lists, where they exist: national guides, newspaper / named critics, independent publications, city/regional sources, and a country note. Jump to one with `grep -n '^### SPAIN' local-critics.md` (country headings are upper-case).
+
+- **Tier 1 — Major food destinations:** Spain · France · Italy · United Kingdom · Germany · Japan · USA · Portugal · Greece · Turkey
+- **Tier 2 — Strong food scenes:** Mexico · Peru · Thailand · India · South Korea · Denmark · Sweden · Netherlands · Belgium · Austria · Switzerland
+- **Tier 3 — Growing/niche scenes:** Serbia · Georgia · Israel · Australia · Singapore · Hong Kong · Colombia · Argentina · Czech Republic · Poland
+- **Cross-country / international sources**
+- **Key patterns & notes:** dominant local platforms, where Gault&Millau matters more than Michelin, domestic guides rivaling Michelin, countries with thin critical infrastructure, recent major changes
+
 ---
 
 ## TIER 1 -- Major Food Destinations
@@ -737,7 +747,7 @@ Gault&Millau's return to Poland (2025) is significant. For 5 years there was no 
 | **La Liste** (laliste.com) | Algorithm-aggregated ranking (1,100+ sources) | Global (top 1,000) | Fine dining | Yes -- co-founded by Jorg Zipprick |
 | **OAD (Opinionated About Dining)** | Crowd-sourced from industry insiders | Global | Fine dining | Yes |
 | **Culinary Backstreets** (culinarybackstreets.com) | Walking tours + editorial | Istanbul, Athens, Mexico City, Tokyo, Lisbon, Barcelona, + more | Street food, traditional, neighborhood | Yes |
-| **Eater** (eater.com) | Digital | US + London, international | Broad | Yes |
+| **Eater** (eater.com) | Digital | US + London, international | Broad | Yes -- but use only per the Eater rule in `SKILL.md` (maintained cities + freshness gate) |
 
 ---
 
