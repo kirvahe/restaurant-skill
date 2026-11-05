@@ -2,6 +2,16 @@
 
 How to capture a visit so the resulting feedback log entry is rich enough to drive future recommendations. This protocol replaces the older "place name + rating" capture for new entries; existing entries in `feedback-log.md` remain in their original format.
 
+## Contents
+- Why this exists (peak-end rule, confirmation bias)
+- Protocol — asymmetric question sequence (the 4-question batch)
+- Decimal scoring rule
+- Feedback-log entry template (date convention, `Company` and `Ordered`)
+- Context frames — what the number was measured against (+ provenance modifiers)
+- Calibration — tier definitions, no drift scan or log-wide average (with old patterns), format-specific anchor
+- Cache correction discipline
+- When the user gives only a rating
+
 ## Why this exists
 
 Two findings from cognitive science motivate the change:
@@ -45,27 +55,70 @@ The /10 scale gains decimal granularity on the top tier where editorial discrimi
 | 6.0–8.9 | integers OR .5 increments allowed (7, 7.5, 8) | Mid-tier doesn't reward false precision |
 | 1.0–5.9 | integers (rarely seen for visits the user actually completes) | — |
 
-Statistics in `feedback-log.md` should compute on the actual decimal values, not rounded. The "average rating" calculation in the Statistics section uses true means.
+Record the decimal the user gave; never round it for storage. (There is no log-wide average to feed — see "No drift scan, no log-wide average" below.)
 
 ## Feedback-log entry template
 
 ```markdown
-### {Place Name} — {City} | {N.M}/10 | YYYY-MM-DD
+### {Place Name} — {City} | {N.M}/10 | visited {X} · logged {YYYY-MM-DD}
 - Type: {format/cuisine}
 - Peak: {one specific moment that defined the meal in memory}
 - End: {how it closed — last dish, coffee, farewell, the bill experience}
 - Disconfirm: {what didn't work / what could be better; "—" only if truly nothing}
 - Axis: {food / food + wine / food + atmosphere / food + concept / etc.}
+- Context: {absolute / rural / neighbourhood / expectation-adjusted / constrained / composite / format-adjusted / occasion-specific / memory — see Context frames below}
+- Company: {couple / friends (N) / solo / colleagues — who was there, because it changes which venues fit}
+- Ordered: {the actual dishes, named. This is what makes an entry reusable}
 - Return: {yes mandatory / yes situational + context / maybe / no}
 - Source: {how we found it — chef, Reddit, want-to-go, walk-in, recommendation}
 - Notes: {address + neighbourhood, anything else; calibration notes if relevant}
 ```
 
+**Date convention.** The header carries two dates, because they are not the same thing and are easily conflated: `visited` is when the meal happened, `logged` is when it was written down. The gap can be years — a meal remembered from a long-ago trip and logged today. `visited` accepts a date (`YYYY-MM-DD`), a month (`YYYY-MM`), an approximation (`~YYYY-MM`), `ongoing (regular)` / `ongoing (N+ visits)` for places the user goes to repeatedly, or `unknown` when the date cannot be established. Write `unknown` rather than reusing the logging date — a guessed visit date silently corrupts any recency reasoning.
+
+**`Company` and `Ordered` are required, not optional detail:** `Company` decides which venues fit at all (couple vs a noisy six-person sharing dinner are different searches), and `Ordered` is what makes an entry reusable later — an entry is only useful a year on if it says which dish worked and which did not.
+
 The Pros/Cons fields from the older format are subsumed by Peak/Disconfirm. The Pros field tended to invite confirmation-biased lists; Peak forces a single specific moment which is more diagnostic.
+
+## Context frames — what the number was measured against
+
+Identical scores mean different things depending on the context they were given in.
+
+The tier table below answers *how good was it*. It does not answer *good compared to what*, and without that second axis the log silently pools incomparable numbers. A single trip can produce two 7s that mean opposite things — a Michelin-starred restaurant that disappointed, and a village osteria that pleasantly surprised.
+
+Record the frame in `Context:`. **Never adjust the user's number to normalise it.** The number is the user's; the frame is the metadata that makes it readable later.
+
+| Frame | Meaning | Signal in the user's wording (EN · RU) |
+|---|---|---|
+| `absolute` | Judged against a full option set in a real city. The default. | No qualifier given, in any language |
+| `rural` | Judged against what a small town or village can realistically deliver. The same food in a capital would score lower. | "good for a small town", "for what it is out here" · «для маленького городка отлично», «для такой глуши очень достойно» |
+| `expectation-adjusted` | A star, a big name or a high price raised the bar. A mid number here means disappointment, not adequacy. | "for a starred place…", "at those prices…" · «для ресторана со звездой…», «за такие деньги…» |
+| `constrained` | The choice set was degraded — holiday closures, Sunday, late night, nothing else open. The venue was not really chosen on merit. | "it was the only thing open", "everything else was shut" · «больше ничего не работало», «всё остальное было закрыто» |
+| `neighbourhood` | A local regular, judged with convenience priced in. Not a claim that it beats destination venues. | "our local", "round the corner from home" · «наше место рядом с домом», «в двух шагах от дома» |
+| `composite` | The user gave two numbers — food alone and overall. Record both; the headline number is not a food score. | "food alone X, overall Y" · «по еде X, в целом Y» |
+| `format-adjusted` | Judged as what it is — an aperitivo counter, a takeaway window — not as a restaurant. Structural ceiling, not a verdict. | "an aperitivo stop, not a dinner", "takeaway only" · «это скорее на аперитив, чем на ужин», «только навынос» |
+| `occasion-specific` | Rated for one craving or occasion, not as an all-purpose venue. | "my go-to when I crave X" · «хожу туда, когда хочется X» |
+| `memory` | Scored years after the visit. A durable emotional anchor, not current information about the venue. | "I was there years ago" · «был там много лет назад» |
+
+### Provenance modifiers — how the number itself was produced
+
+Separate from the frame, and worth recording when it applies, because it changes how much the number can bear:
+
+- **`scale-converted`** — a rating originally given on another scale (e.g. 4/5 during a bulk import), converted arithmetically and possibly rounded under a blanket rule. Those numbers are arithmetic, not judgement, and should not be treated as precise.
+- **`manually corrected`** — a converted rating the user then overrode by hand. These are the most reliable entries of a converted batch — a deliberate number beats a derived one.
+- **`carried-over`** — a revisit where the user declined to re-score and kept the previous number. The number is the previous rating held, not a fresh judgement of that visit.
+
+A rating whose provenance is `scale-converted` and never corrected should not be used as evidence in a calibration argument without saying so.
+
+Consequences for how the log is read:
+
+- **Averages are computed within a frame, not across.** A flat log-wide mean mixes a rural 8 with an absolute 8 and means little.
+- **Recommendations inherit the frame.** A `rural` 8 does not license recommending that venue to someone with city alternatives; an `expectation-adjusted` 7 is a warning about a well-reviewed place, not a mild endorsement.
+- **Frames are why there is no log-wide average.** A run of `rural` entries drags a pooled mean down and a run of `neighbourhood` entries pushes it up, without either saying anything about the user's standards. Averaging across frames produces a number that looks meaningful and is not.
 
 ## Calibration — tier definitions, not fixed places
 
-To prevent rating drift over years, tiers are defined by **observable behavior signals** the protocol fields already capture (peak / end / disconfirm / return). The previous mechanism — three fixed reference restaurants compared against every new rating — is replaced because it forced cross-format comparison (e.g., wine bar vs Basque grill) that was incoherent in practice and produced ratings the calibration ritual could not actually defend. Anchors also drift in memory themselves, importing a new drift problem to solve an old one.
+Tiers are defined by **observable behavior signals** the protocol fields already capture (peak / end / disconfirm / return), not by fixed reference restaurants: a fixed anchor forces cross-format comparison (a wine bar against a Basque grill) that cannot be defended, and anchors drift in memory themselves.
 
 ### Tier definitions
 
@@ -80,16 +133,21 @@ To prevent rating drift over years, tiers are defined by **observable behavior s
 
 The /10 number reads against these definitions. Decimal granularity on 9.0+ remains for editorial discrimination at the top tier.
 
-### Drift detection — periodic scan, not per-rating check
+### No drift scan, no log-wide average
 
-Reference-point drift over years is real (hedonic adaptation). The protocol catches it via **periodic statistical scan** of `feedback-log.md`, not by per-rating comparison to a fixed restaurant.
+There is no periodic drift scan and no log-wide average, deliberately. The only input such a scan could use is a mean pooled across nine incompatible `Context` frames, and a drift observation has no action attached — the cuisine calibration in `SKILL.md` is the one mechanism that proposes a profile change and writes to a file. The `Context:` field makes each rating readable on its own terms, with no cross-year comparison required. If drift ever genuinely needs measuring, do it inside one frame (`absolute` only) and name the frame.
 
-After every 15 visits added, surface to the user:
-- Is the running average creeping upward without proportional growth in mandatory-return entries?
-- Has a tier become inflated (e.g., 5+ new 9s in a quarter with no 10s)?
-- Is a format consistently scoring 8+ but still tagged as a non-Top tier in `taste-profile.md`?
+#### Old patterns
 
-If yes — present findings and let the user decide whether the bar shifted or the data shifted. Never auto-recalibrate.
+<details>
+<summary>Periodic drift scan and log-wide average (v1.2 – v1.3, removed in v1.4)</summary>
+
+The mechanism existed here from v1.2 until v1.4, and was removed because there was no good answer to what it was for.
+
+It asked three questions after every 15 visits, and its own closing instruction was *"present findings and let the user decide… Never auto-recalibrate"* — an observation with no action attached. Run against a real log, it produced a few lines of text and changed nothing. Two of its questions led nowhere. The third (*"is a format scoring 8+ but still tagged non-Top?"*) duplicated the cuisine calibration in `SKILL.md`, which does have an Apply y/n step and a file to write to.
+
+Its only input was the log-wide average, which pooled nine incompatible `Context` frames and therefore could not be read literally. The average has been removed from `feedback-log.md` for the same reason. A guard whose only job was to protect a number nobody could use.
+</details>
 
 ### Optional: format-specific anchor when a format has >= 5 entries
 
@@ -99,11 +157,11 @@ Before assigning >=8 to a new entry in that format, scan the 3 most recent same-
 - Does this visit clear them on at least one dimension (peak, return-strength, craft)?
 - Or does it sit in the same band as a prior 7 that the user already labeled "solid, no spark"?
 
-For formats with <5 entries: skip this anchor check. Rely on the tier definitions above and the structured protocol fields. **Do NOT cross-format compare** (a new wine bar vs a Basque grill 8) — that was the previous mechanism's broken default.
+For formats with <5 entries: skip this anchor check. Rely on the tier definitions above and the structured protocol fields. Do not cross-format compare (a new wine bar vs a Basque grill 8).
 
 ## Cache correction discipline
 
-If a visit reveals that prior cache notes were wrong (e.g., Andra Mari's "no panoramic views" was wrong — the terrace has a mountain view), include an explicit `CACHE CORRECTION:` line in Notes describing what was wrong. The next search reads this and fixes the city cache.
+If a visit reveals that prior cache notes were wrong (e.g., the cache said "no panoramic views" and the terrace turned out to have a mountain view), include an explicit `CACHE CORRECTION:` line in Notes describing what was wrong. The next search reads this and fixes the city cache.
 
 ## When the user gives only a rating
 

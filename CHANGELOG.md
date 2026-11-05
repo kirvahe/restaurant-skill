@@ -7,6 +7,45 @@ Note: entries for v0.9.0, v1.0, and v1.1 were backfilled retroactively on 2026-0
 
 ## [Unreleased]
 
+## [v1.4] — 2026-11-05
+
+Adds new source rules, a richer visit protocol and stricter data-quality checks, and reorganises the skill along Anthropic's skill-authoring best practices. The reorganisation moves material between files; it does not change what the existing rules require.
+
+### Added
+- **Guía Repsol** as a MANDATORY source for Spain, Portugal and Andorra, with `references/guia-repsol.md` (API access via Bash + curl, filter vocabulary, URL patterns, trust guardrails). `references/source-confidence.md` weights inspector-, chef- and celebrity-sourced awards differently.
+- **ComerJapones** as a MANDATORY source for Japanese cuisine in Spain; ComerJapones and profundidad.net added to the Spain section of `local-critics.md`.
+- **Home-country business press** rule for ethnic-cuisine searches that conclude "this format does not exist here", with a MANDATORY closure check and a rule against treating delivery-platform or menu-aggregator pages as proof that a venue is open.
+- **Diaspora-language Q&A boards** as a MANDATORY layer for ethnic-cuisine searches outside the cuisine's home country.
+- **Context frames** and **provenance modifiers** in `references/visit-protocol.md`: each rating records what it was measured against, and the user's number is never adjusted.
+- Separate `visited` / `logged` dates in feedback-log entries.
+- `references/worked-failures.md` — the worked cases and dated source notes behind the business-press, diaspora-board and Eater rules.
+- Tables of contents in `local-critics.md`, `references/guia-repsol.md` and `references/visit-protocol.md`.
+
+### Changed
+- **Eater** is used only for the cities it actively maintains, and only after a freshness gate on the page's modified/published dates; a stale list contributes nothing to a candidate's source tier.
+- **Google Maps cross-check** matches on normalised names, runs a direct grep for short names, and verifies every finalist individually before the card is written.
+- Every venue name in every table is a Google Maps link.
+- `Company` and `Ordered` are back in the feedback-log entry format; the feedback-log template uses the behaviour-based tier definitions.
+- Recording or analysing visits no longer computes a log-wide average or by-city/axis/type distributions. The template's `## Statistics` block is now `## Reference`, and the periodic drift scan is removed (kept as an old pattern in `references/visit-protocol.md`).
+- `SKILL.md` restructured for progressive disclosure: worked examples, rationale and dated notes from Search Rules moved to `references/worked-failures.md`, each replaced by a pointer that says when to read it. Every reference file, including `guia-repsol.md`, is now listed in `SKILL.md`.
+- MCP tool names are fully qualified (`mcp__exa__…`, `mcp__firecrawl__…`), with a note that the server prefix can differ between installations.
+- A project search-routing rules file is honoured when present; without one, the skill's own routing applies.
+- Russian signal phrases sit beside the English ones in the Context-frames table.
+- **Reddit** has its own pipeline instead of an Exa route: threads are found with Firecrawl `site:reddit.com` search (and PullPush for a named venue) and read in full from the Arctic Shift archive, because Exa and WebSearch no longer return Reddit threads. A `reddit-research` skill is used when one is installed.
+- The language rule is stated once, in plain terms, and now covers the questions the skill asks; `Overview` is named as a deliberate exception to it.
+- Recording a revisit shows the prior entry (rating, axis, context frame, notes) before the new one is added.
+- Eater keeps the subdomain rule; every other staleness judgement goes through the freshness gate.
+- Onboarding block 5 asks about anti-patterns directly instead of pointing to a template file that is not installed with the skill.
+- Instructions no longer carry list or entry counts or narrate earlier versions; dated source figures live in `references/worked-failures.md` and the Guía Repsol guardrails, and version history in the "Old patterns" block of `references/visit-protocol.md`.
+- Guía Repsol award routes are ranked the same way in every file: chef-sourced strongest, inspector-awarded next, celebrity-sourced not counted.
+- Cuisine calibration averages ratings within one `Context` frame, not across frames.
+- Onboarding reference restaurants use the `visited` / `logged` date convention.
+- Version set to 1.4 in `SKILL.md`, `config.yml.example` and the README; the ROADMAP's next target is now v1.5.
+
+### Fixed
+- The hidden-gem example in `references/hidden-gems.md` cited an Eater list that the Eater rule excludes; it now cites a source the rules accept.
+- `SKILL.md` → Analyze pointed "below" for the cuisine calibration, which sits under Record a visit.
+
 ## [v1.3] — 2026-06-28
 
 Reconciles the live skill with the repo: several improvements that had been hand-edited into the deployed copy are now captured in version control, plus two new data-quality rules (closed-venue filtering, capsule wiring) and a clearer tool-routing model.

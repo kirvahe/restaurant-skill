@@ -2,6 +2,16 @@
 
 *Compiled: 2026-03-18. Excludes aggregators (TripAdvisor, Yelp, TheFork, Google Maps), influencers, and tourist guides.*
 
+## Contents
+
+31 countries. Each country section lists, where they exist: national guides, newspaper / named critics, independent publications, city/regional sources, and a country note. Jump to one with `grep -n '^### SPAIN' local-critics.md` (country headings are upper-case).
+
+- **Tier 1 — Major food destinations:** Spain · France · Italy · United Kingdom · Germany · Japan · USA · Portugal · Greece · Turkey
+- **Tier 2 — Strong food scenes:** Mexico · Peru · Thailand · India · South Korea · Denmark · Sweden · Netherlands · Belgium · Austria · Switzerland
+- **Tier 3 — Growing/niche scenes:** Serbia · Georgia · Israel · Australia · Singapore · Hong Kong · Colombia · Argentina · Czech Republic · Poland
+- **Cross-country / international sources**
+- **Key patterns & notes:** dominant local platforms, where Gault&Millau matters more than Michelin, domestic guides rivaling Michelin, countries with thin critical infrastructure, recent major changes
+
 ---
 
 ## TIER 1 -- Major Food Destinations
@@ -14,7 +24,7 @@
 
 | Source | Type | Best for | Language | Active |
 |---|---|---|---|---|
-| **Guia Repsol** | National guide (1-3 Soles rating) | Broad, fine dining to casual | Spanish | Yes -- 2026 edition out, 808 restaurants rated |
+| **Guia Repsol** | National guide — two systems: 1-3 Soles (808 restaurants) + Soletes (5,500+ casual). Open API — see `references/guia-repsol.md` | Broad; Soletes are the casual/taberna layer Michelin ignores | Spanish | Yes -- 2026 edition; Soletes republished 2-4x/year |
 | **Michelin Guide Spain & Andorra** | International guide | Fine dining | Spanish/English | Yes -- 2026 edition |
 
 #### Newspaper Critics
@@ -30,6 +40,8 @@
 | Source | Type | Best for | Language | Active |
 |---|---|---|---|---|
 | **7 Canibales** (7canibales.com) | Digital magazine | Broad, editorial | Spanish | Yes |
+| **ComerJapones** (comerjapones.com) | Specialist blog + venue finder | Japanese cuisine ONLY -- udon, soba, tempura, izakaya, katei ryori; names the dish to order | Spanish | Yes -- finder current, long-form reviews often 2007-2012 |
+| **profundidad.net** (Luis Rodriguez, founder of Japonismo.com) | Personal blog | Japan-specialist; MA in contemporary Japan studies | Spanish | Yes -- and keeps closure updates current on old posts |
 | **Tapas Magazine** (tapasmagazine.es) | Digital magazine | Broad, trends, interviews | Spanish | Yes |
 | **GastroActitud** (gastroactitud.com) | Online portal | Broad, news | Spanish | Yes -- 2.5M+ visits/year |
 | **The Gourmet Journal** (thegourmetjournal.com) | Digital magazine | Fine dining, guide coverage | Spanish | Yes |
@@ -735,7 +747,7 @@ Gault&Millau's return to Poland (2025) is significant. For 5 years there was no 
 | **La Liste** (laliste.com) | Algorithm-aggregated ranking (1,100+ sources) | Global (top 1,000) | Fine dining | Yes -- co-founded by Jorg Zipprick |
 | **OAD (Opinionated About Dining)** | Crowd-sourced from industry insiders | Global | Fine dining | Yes |
 | **Culinary Backstreets** (culinarybackstreets.com) | Walking tours + editorial | Istanbul, Athens, Mexico City, Tokyo, Lisbon, Barcelona, + more | Street food, traditional, neighborhood | Yes |
-| **Eater** (eater.com) | Digital | US + London, international | Broad | Yes |
+| **Eater** (eater.com) | Digital | US + London, international | Broad | Yes -- but use only per the Eater rule in `SKILL.md` (maintained cities + freshness gate) |
 
 ---
 

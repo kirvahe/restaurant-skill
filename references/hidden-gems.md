@@ -8,7 +8,7 @@ Three convergent findings:
 
 1. **Popularity bias is universal** — 2024 academic survey (Springer 2024) shows recommender systems reliably over-recommend already-popular items, creating self-reinforcing loops. The most-recommended restaurant in a city is often the worst recommendation for a returning traveler with strong taste.
 2. **Filter bubble compounding** — when the user has well-developed taste (the case here), the easiest path is to keep recommending similar places. Filter bubble risk is intra-user, not inter-user.
-3. **User feedback alignment** — the user's "fire in eyes not polished" preference directly maps to under-the-radar discoveries. Los Fueros (Bilbao 9/10) was an off-cache discovery that 4 prior search rounds missed precisely because the heritage-revival angle wasn't surfaced through standard ranking.
+3. **User feedback alignment** — a preference for raw passion over polish maps directly to under-the-radar discoveries. A heritage-revival tavern rated 9/10 was an off-cache discovery that four earlier search rounds had missed, because standard ranking never surfaced the heritage-revival angle.
 
 Mandating one hidden gem per output forces the search to look beyond the obvious convergent picks.
 
@@ -30,7 +30,7 @@ In all cases, "low review count" is the bottom 25th percentile of comparable ven
 
 The candidate must ALSO have a strong editorial signal:
 - Mentioned in a trusted source (any [A] or [B] tier source per `source-confidence.md`)
-- OR cited in a chef interview / Eater / Infatuation hit list / local food critic
+- OR cited in a chef interview / a maintained Eater list that passes the freshness gate in SKILL.md / Infatuation hit list / local food critic
 - OR off-cache discovery from a deep search (a place that came up in research but was excluded from prior searches for axis mismatch)
 
 A "hidden" place with no editorial signal is just an unknown — that's not the goal.
@@ -58,7 +58,7 @@ In the output, the hidden gem slot is explicitly labeled:
 ## Hidden Gem (under-the-radar slot)
 
 ### 3. {Place with low review count + editorial signal}
-> ... · GM 4.2 (87 reviews) · **Sources:** [B] Eater Madrid 2025 — "untouched neighborhood gem"
+> ... · GM 4.2 (87 reviews) · **Sources:** [B] Madrid Secreto — "untouched neighborhood gem"
 > Hidden because: locals' lunchtime spot, no English menu, no reservations
 ```
 
