@@ -77,7 +77,7 @@ All paths relative to `data_dir` from config.yml:
 - `## Blacklist` — permanently excluded restaurants with one-line reason
 
 **Multi-round sections (added only when Round 2+ occurs):**
-- `## Round N — {outcome}` — archive of completed round. Heading includes outcome: "rejected by wife (visual)", "dinner hours problematic", etc.
+- `## Round N — {outcome}` — archive of completed round. Heading includes outcome: "rejected by partner (visual)", "dinner hours problematic", etc.
 - `## Excluded (with reason)` — cumulative exclusion list across all rounds. One entry per restaurant: name + one-line causal reason. Grows across rounds, never shrinks
 - `## Criteria changes` — documents what shifted between rounds: `R1→R2: {what changed and why}`
 - `## Transport notes` — when distances vary across candidates
@@ -145,7 +145,7 @@ Before searching, check if this is a continuation of a previous search:
 2. Detect refinement signals in user message:
    - References to prior results: "none of those work", "she didn't like any", "try something else"
    - Criteria shifts: "actually lunch not dinner", "forget the view", "tasting menu is OK now"
-   - Companion feedback: "wife rejected", "he wants something more casual"
+   - Companion feedback: "partner rejected", "he wants something more casual"
    - Explicit round language: "round 2", "next batch", "refine"
 
 **If continuation detected:**
@@ -298,7 +298,7 @@ Do not scope a query to a city subdomain (`site:london.eater.com`) — dormant s
 When continuing a previous search (Round 2+):
 - ALL restaurants from prior rounds are excluded — never re-recommend a rejected candidate
 - Load exclusion list from `cities/{city}.md` `## Excluded (with reason)` section
-- Add every new exclusion with a one-line causal reason. Use companion's words when available, preserve original language (e.g., "Wife: 'пош, не уютно'" not "Decor mismatch")
+- Add every new exclusion with a one-line causal reason. Use companion's words when available, preserve original language (e.g., "Partner: 'шумно, не поговорить'" not "Noise level too high")
 - Exclusion reasons are causal: "Too far without car", "Lunch only, need dinner", "No panoramic views"
 - If user explicitly reinstates a previously excluded restaurant, remove it from the exclusion list
 
@@ -369,7 +369,7 @@ A round transition happens when the user provides feedback on the current round'
 - Repeat prior round results — the user already saw them
 - Re-search excluded restaurants — the exclusion list is definitive unless the user explicitly reinstates a candidate
 
-**Companion feedback as round trigger:** receiving "wife rejected all 4" or similar = Round N is complete, Round N+1 begins. Record feedback verbatim in the round archive, preserve original language including non-English.
+**Companion feedback as round trigger:** receiving "partner rejected all 4" or similar = Round N is complete, Round N+1 begins. Record feedback verbatim in the round archive, preserve original language including non-English.
 
 ---
 
@@ -423,7 +423,7 @@ Labels (strong pick / speculative / ✅ / ⚠️ / ❌) remain FORBIDDEN in all 
 **Single-shot:**
 1. Save as `recommendations/{city}-{type}-YYYY-MM-DD.md` — write using Bash tool, do not show file content in chat
 2. Update `cities/{city}.md` cache — write using Bash tool, do not show file content in chat
-3. Write all researched-but-not-selected candidates from this search to `## Mentioned (researched, not yet selected)` in `cities/{city}.md`. Include one-line context (why excluded from this cut: e.g. "no view", "tasting menu only", "too far"). This applies to candidates surfaced anywhere in the chat — research alternatives, near-miss options, candidates rejected for axis-mismatch, anything you actually looked up. Goal: prevent "Los Fueros effect" — losing a researched candidate between sessions because it didn't make a single search's final cut
+3. Write all researched-but-not-selected candidates from this search to `## Mentioned (researched, not yet selected)` in `cities/{city}.md`. Include one-line context (why excluded from this cut: e.g. "no view", "tasting menu only", "too far"). This applies to candidates surfaced anywhere in the chat — research alternatives, near-miss options, candidates rejected for axis-mismatch, anything you actually looked up. Goal: never lose a researched candidate between sessions just because it didn't make a single search's final cut
 4. Last line of chat: link to saved .md file
 
 **Multi-round (Round 2+):**
@@ -438,7 +438,7 @@ Labels (strong pick / speculative / ✅ / ⚠️ / ❌) remain FORBIDDEN in all 
 
 Round history lives in `cities/{city}.md`, not in the recommendation file. This keeps the recommendation file clean and actionable.
 
-**Recommendations recap before the link** — the very END of every Find-a-spot response must be a compact recap list of the recommended places (name + one-line hook each, in recommendation order), placed immediately ABOVE the file link. The cards above can be scrolled past; this recap is the scannable takeaway. Meta/notes go above the recap; nothing goes between the recap and the file link except the link itself. See memory `feedback_results_before_link`.
+**Recommendations recap before the link** — the very END of every Find-a-spot response must be a compact recap list of the recommended places (name + one-line hook each, in recommendation order), placed immediately ABOVE the file link. The cards above can be scrolled past; this recap is the scannable takeaway. Meta/notes go above the recap; nothing goes between the recap and the file link except the link itself.
 
 **Always end with the .md file link** — every response (find, record, analyze) must finish with a link to the saved/updated file. Order at the bottom of the message is strictly: recap list → file link (last line).
 

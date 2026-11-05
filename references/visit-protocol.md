@@ -161,7 +161,7 @@ For formats with <5 entries: skip this anchor check. Rely on the tier definition
 
 ## Cache correction discipline
 
-If a visit reveals that prior cache notes were wrong (e.g., Andra Mari's "no panoramic views" was wrong — the terrace has a mountain view), include an explicit `CACHE CORRECTION:` line in Notes describing what was wrong. The next search reads this and fixes the city cache.
+If a visit reveals that prior cache notes were wrong (e.g., the cache said "no panoramic views" and the terrace turned out to have a mountain view), include an explicit `CACHE CORRECTION:` line in Notes describing what was wrong. The next search reads this and fixes the city cache.
 
 ## When the user gives only a rating
 
