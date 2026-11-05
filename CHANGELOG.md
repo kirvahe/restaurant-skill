@@ -31,10 +31,18 @@ Adds new source rules, a richer visit protocol and stricter data-quality checks,
 - MCP tool names are fully qualified (`mcp__exa__…`, `mcp__firecrawl__…`), with a note that the server prefix can differ between installations.
 - A project search-routing rules file is honoured when present; without one, the skill's own routing applies.
 - Russian signal phrases sit beside the English ones in the Context-frames table.
+- **Reddit** has its own pipeline instead of an Exa route: threads are found with Firecrawl `site:reddit.com` search (and PullPush for a named venue) and read in full from the Arctic Shift archive, because Exa and WebSearch no longer return Reddit threads. A `reddit-research` skill is used when one is installed.
+- The language rule is stated once, in plain terms, and now covers the questions the skill asks; `Overview` is named as a deliberate exception to it.
+- Recording a revisit shows the prior entry (rating, axis, context frame, notes) before the new one is added.
+- Eater keeps the subdomain rule; every other staleness judgement goes through the freshness gate.
+- Onboarding block 5 asks about anti-patterns directly instead of pointing to a template file that is not installed with the skill.
+- Instructions no longer carry counts that go stale or narrate earlier versions; that history stays in the "Old patterns" block of `references/visit-protocol.md`.
 - Version set to 1.4 in `SKILL.md`, `config.yml.example` and the README; the ROADMAP's next target is now v1.5.
 
 ### Fixed
 - In `references/guia-repsol.md`, the `poisMap` warning sat inside the bash code block; it is now regular text.
+- The hidden-gem example in `references/hidden-gems.md` cited an Eater list that the Eater rule excludes; it now cites a source the rules accept.
+- `SKILL.md` → Analyze pointed "below" for the cuisine calibration, which sits under Record a visit.
 
 ## [v1.3] — 2026-06-28
 

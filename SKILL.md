@@ -5,18 +5,9 @@ argument-hint: [city mood/type]
 version: "1.4"
 ---
 
-## LANGUAGE RULE — RESPONSE LANGUAGE = REQUEST LANGUAGE (НЕНАРУШАЕМО)
+## Language
 
-**ALL user-facing output is in the language of the user's request. Russian request → Russian answer. English request → English answer.**
-
-This applies to EVERYTHING shown to the user, with NO exceptions:
-- Chat prose (Overview, card descriptions, notes)
-- Inline blocks (★ Insight, summaries, explanations)
-- Saved `recommendations/*.md` files
-
-Internal data files stay in English regardless of request language: `taste-profile.md`, `feedback-log.md`, `cities/*.md`, `config.yml`, `MEMORY.md`. File and folder NAMES are always ASCII-English. But everything the user reads = request language. No English fragments inside a Russian conversation, no mixing.
-
-If you catch yourself drafting user-facing text in a language different from the request — STOP and rewrite. See `~/.claude/CLAUDE.md` (LANGUAGE RULES) and memory `feedback_output_language_match.md`.
+All user-facing output is in the language of the user's request: chat prose (Overview, card descriptions, notes), inline blocks (★ Insight, summaries, explanations) and the saved `recommendations/*.md` files — with no English fragments inside a Russian conversation. Internal data files stay in English regardless of request language: `taste-profile.md`, `feedback-log.md`, `cities/*.md`, `config.yml`, `MEMORY.md`. File and folder names are always ASCII-English. The questions you ask count as user-facing too: the English hints in the visit-protocol templates ("what didn't work / what could be better") are for the log, so ask them in the request language. A global language rule in `~/.claude/CLAUDE.md`, if there is one, says the same; it is repeated here because a recommendation file and ★ Insight blocks once came out in English in a Russian session.
 
 ## Setup
 
@@ -63,7 +54,7 @@ All paths relative to `data_dir` from config.yml:
 | `google-maps-data.md` | Index of all Google Maps saved lists (symlink to gmaps_data_dir). Read to discover available lists |
 
 **Google Maps data** (lives at `gmaps_data_dir` from config.yml):
-- `google-maps-data.md` — index of all synced lists (auto-updated by the sync script)
+- `google-maps-data.md` — index of all synced lists (auto-updated by the sync script; read it for the current list names)
 - `{list-name}.tsv` — one TSV file per list. Format: `Name\tRating\tReviews\tType\tStatus`
 - Key lists: `favorites.tsv`, `want-to-go.tsv`, `noodles.tsv`, `italian.tsv`, `japanese.tsv`, `cocktail-bar.tsv`, etc.
 
@@ -105,7 +96,7 @@ Single-shot searches create ONLY standard sections. Multi-round sections appear 
 
 ### Web search failure:
 - If primary search tool returns error or empty results → try fallback tool (see Search tool detection below).
-- **Site-specific rejection** (e.g. Firecrawl returns "We do not support this site" — happens on Reddit): do NOT drop the source. Immediately retry via Exa (`mcp__exa__web_search_exa` or `mcp__exa__web_fetch_exa`). Reddit is a top-priority source — never abandon it because Firecrawl can't scrape it. A scrape/tool error counts as a primary-tool failure and triggers fallback, same as an empty result.
+- **Site-specific rejection** (e.g. Firecrawl returns "We do not support this site"): do NOT drop the source. Immediately retry via Exa (`mcp__exa__web_search_exa` or `mcp__exa__web_fetch_exa`). A scrape/tool error counts as a primary-tool failure and triggers fallback, same as an empty result. **Reddit is the exception:** Exa, Firecrawl scrape and WebSearch all fail on it — read it through its own pipeline (Search tool detection → Reddit), and never abandon it as a source.
 - If ALL search tools fail → use training knowledge only. Add to Overview: "Web search unavailable — recommendations based on training data only. Verify independently."
 - Never silently degrade. If any data source was unavailable, state which one and what was skipped.
 
@@ -198,13 +189,14 @@ TripAdvisor · Yelp · TheFork · Instagram · Tourist guides · AI-generated li
 ### Search tool detection — route by query type (hybrid)
 There is no single "primary" tool. If the project defines a search-routing rules file (such as `.claude/rules/web_search.md`), it is a per-task-type table, not a blanket preference — honor it by picking the tool by what the query actually needs, as below. If there is no such file, use the routing below as is:
 
-- **Exa** (`mcp__exa__web_search_exa` / `mcp__exa__web_fetch_exa`) → Reddit (ALWAYS — Firecrawl cannot scrape Reddit), editorial/diaspora consensus, and semantic discovery ("places similar to X", "natural-wine bars like Y"). This is the bulk of restaurant discovery.
+- **Reddit** → its own pipeline, not a search-tool fallback. If a `reddit-research` skill is installed, use it. Otherwise find threads with `mcp__firecrawl__firecrawl_search` and `site:reddit.com {query}` (the post ID is the `/comments/{id}/` part of the URL; for a named venue, PullPush full-text search `https://api.pullpush.io/reddit/search/comment/?q="{name}"` also returns `link_id`s), then read each thread's full comment tree with scores from the Arctic Shift archive: `curl -s "https://arctic-shift.photon-reddit.com/api/comments/tree?link_id={post_id}&limit=9999"`. Exa and WebSearch return no Reddit threads, and search snippets are not Reddit data — if the archive is unreachable, say that Reddit was not read.
+- **Exa** (`mcp__exa__web_search_exa` / `mcp__exa__web_fetch_exa`) → editorial/diaspora consensus and semantic discovery ("places similar to X", "natural-wine bars like Y"). This is the bulk of restaurant discovery.
 - **Firecrawl** (`mcp__firecrawl__firecrawl_search` / `mcp__firecrawl__firecrawl_scrape`) → structured local-business lookups (exact address, opening hours, "near me"), scraping a specific known URL (a venue's own site, a Michelin page), and Madrid Secreto category pages.
 - **Direct HTTP via Bash + curl** → the Guía Repsol API only (`guia-app-api.cloudapp.repsol.com`, no auth). Its venue-listing endpoint is a POST, so no scrape/fetch tool can reach it. Use for Spain/Portugal/Andorra discovery, then Firecrawl the returned `canonical` URL for the details the API omits. See `references/guia-repsol.md`.
 - **Built-in WebSearch/WebFetch** → last resort only (no site: filtering).
 - None available → Degraded Mode (see Resilience section).
 
-Reddit is a top-priority source queried 3×/cuisine, and Firecrawl returns "We do not support this site" on it — so route Reddit straight to Exa instead of wasting a Firecrawl call first. Cache the tool chosen per purpose for the session; re-detect only on error. MCP server prefixes differ between installations (e.g. `mcp__claude_ai_Exa__web_search_exa` instead of `mcp__exa__web_search_exa`) — when a name above is not available, use the equivalent tool from whichever Exa or Firecrawl server is installed.
+Reddit is a top-priority source queried 3×/cuisine; it has its own pipeline (the Reddit bullet above), not a fallback chain. Cache the tool chosen per purpose for the session; re-detect only on error. MCP server prefixes differ between installations (e.g. `mcp__claude_ai_Exa__web_search_exa` instead of `mcp__exa__web_search_exa`) — when a name above is not available, use the equivalent tool from whichever Exa or Firecrawl server is installed.
 
 ### Language rule — search in up to 3 languages:
 1. Country language FIRST — local critics are strongest (in Spain/Portugal/Andorra this includes Guía Repsol)
@@ -298,7 +290,7 @@ The second test matters because the 9-city list below is a snapshot of July 2026
 
 **Access:** `mcp__firecrawl__firecrawl_scrape` on `https://{sub}.eater.com/maps` with `formats:["json"]` returns that US city's current 38 and heatmap in one call. For international cities, resolve through `https://www.eater.com/international-maps` or search — international slugs are not guessable. Check the final status after redirects; the `/eater-38` hub still links dead URLs that 301 into 404s.
 
-**Never** scope a query to a city subdomain (`site:london.eater.com`) — dormant subdomains return only archives and miss the live list on `www`. **Never** use the San Sebastián list: it is titled "12 Best *New* Restaurants", was published in 2012 and last touched in 2018. For Spain the whitelist leaves Barcelona only; how stale the other Spanish lists were when last checked is in `references/worked-failures.md` → "Eater — dated coverage notes".
+Do not scope a query to a city subdomain (`site:london.eater.com`) — dormant subdomains return only archives and miss the live list on `www`. The freshness gate decides everything else: a page that fails it (the San Sebastián "Best New Restaurants" list, published 2012, is the extreme case) contributes nothing, not even as a weak signal.
 
 ### Anti-recommendation search: search for overrated/avoid mentions in the target city. Build blacklist BEFORE recommending. In Round 2+, user/companion exclusions replace the anti-recommendation search — run anti-rec search only in Round 1.
 
@@ -384,7 +376,7 @@ A round transition happens when the user provides feedback on the current round'
 ## Output Format
 
 ### Structure:
-1. **Overview** (always this word, even in non-English output) — can be text, bullets, or a mix (e.g. one intro line + bullets). Key facts, practical summary, **inferred occasion** (one phrase). For Round 2+ searches, Overview must open with: what changed from the previous round and why (one line), count of excluded restaurants (not the full list), then standard content.
+1. **Overview** (always this word, even in non-English output — a deliberate exception to the request-language rule: the user's notes and saved files refer to the "Overview section" by this name) — can be text, bullets, or a mix (e.g. one intro line + bullets). Key facts, practical summary, **inferred occasion** (one phrase). For Round 2+ searches, Overview must open with: what changed from the previous round and why (one line), count of excluded restaurants (not the full list), then standard content.
 2. **Cards** — 2-5 places, sorted by relevance (best match first, weakest last). NO labels. Never pad with weak options to reach a count.
 3. **Hidden Gem** — for outputs of 3+ picks, one slot is reserved for an under-the-radar candidate. See `references/hidden-gems.md` for selection criteria + when the slot can be skipped.
 4. **Proximity note** — ONLY when planning an evening (restaurant + bar) or exploring a new city. NEVER suggest walking from restaurant to restaurant.
@@ -410,7 +402,7 @@ The `[A]` / `[B]` / `[C]` tier prefix on the Sources line is mandatory — see `
 - NO comparisons to reference restaurants
 - NO italic (unreadable in terminal)
 - NEVER start a line with `~` (renders as strikethrough in Claude Code)
-- Google Maps link: always `https://www.google.com/maps/search/{Name+Street+City}` (path form, no query params). Use ASCII only (strip accents: Dongiò → Dongio), spaces as `+`, include the street so the pin resolves to the exact venue, not a fuzzy name match. (Note: a link opening two browser tabs is a Warp terminal Cmd+Click behavior, not a URL-format issue — not fixable from link formatting.)
+- Google Maps link: always `https://www.google.com/maps/search/{Name+Street+City}` (path form, no query params). Use ASCII only (strip accents: Dongiò → Dongio), spaces as `+`, include the street so the pin resolves to the exact venue, not a fuzzy name match.
 - **Every venue name in EVERY table is a Google Maps hyperlink** — no exceptions, no separate link column. Wrap the name itself: `| [Kai Ten](https://www.google.com/maps/search/Kai+Ten+Example+St+12+Berlin) | якитори | ... |`. Applies to comparison tables, "Mentioned", "Excluded", city-cache tables, and any ad-hoc table in chat or in a saved `.md`. A table of place names without links forces the user to re-search each one by hand, which defeats the point of the table.
 - For home city: include neighbourhood + distance from home address
 - `---` between cards
@@ -467,12 +459,12 @@ Skip debrief for active multi-round searches — if the most recent round in `ci
 
 Read feedback-log.md first. New entries follow the **visit protocol** — asymmetric question batch (peak / end / disconfirm / return) with decimal scoring on the 9.0+ tier. See `references/visit-protocol.md` for the full question template, decimal rule, and entry format.
 
-Existing entries captured in the older format remain unchanged — the new format applies only to new captures going forward.
+Entries captured in the older "place + rating" format remain unchanged; the protocol applies to new captures.
 
-If the place already exists in feedback-log.md (e.g. from onboarding or a previous visit), add a new dated entry — it's a revisit, not a duplicate. Multiple entries per place are expected and help track taste evolution.
+If the place already exists in feedback-log.md (e.g. from onboarding or a previous visit), show the prior entry first — rating, axis, context frame, notes — so the user can see whether the rating changed, then add a new dated entry: it's a revisit, not a duplicate. Multiple entries per place are expected and help track taste evolution.
 
 After recording:
-1. Update the `## Reference` block in feedback-log.md — power spots, the strong tier, best source, context frames, provenance. **Do NOT compute a log-wide average or any by-city/by-axis/by-type distribution.** Those were removed in v1.4: the average pooled incompatible `Context` frames and fed a drift scan that had no action attached. Reasoning is recorded in `references/visit-protocol.md` → "Drift detection — removed" and in the log's own "Why there is no average" section. If a number is ever needed, compute it inside one frame and name the frame
+1. Update the `## Reference` block in feedback-log.md — power spots, the strong tier, best source, context frames, provenance. The log carries no log-wide average and no by-city/by-axis/by-type distribution: ratings sit in incompatible `Context` frames, so a pooled number looks meaningful and is not, and nothing acts on it. If a number is ever needed, compute it inside one frame and name the frame
 2. Update cities/{city}.md — write using Bash tool, do not show content in chat
 3. If 10/10 → suggest adding to taste-profile references
 
@@ -487,7 +479,7 @@ If feedback-log has fewer than 5 dated entries (excluding Block 6 historical ent
 
 Read feedback-log.md, taste-profile.md, all cities/*.md. Find patterns in high-rated (8-10) and low-rated (1-5) visits, **reading each rating against its `Context:` frame** — an 8 with a `rural` frame and an 8 with an `absolute` frame are not the same evidence. Compare with the current profile: what's confirmed, what's new, what's questionable. Propose specific updates to taste-profile.md, show to user, wait for confirmation. Refresh the `## Reference` block in feedback-log.md. Summarize key findings.
 
-**Do not compute a log-wide average or by-city/by-axis/by-type distributions.** They count without informing anything, and the average is actively misleading across frames — removed in v1.4, see `references/visit-protocol.md`. Group by `Context` frame or by cuisine instead; the cuisine calibration under Record a visit is the mechanism that actually changes the profile.
+No log-wide average and no by-city/by-axis/by-type distributions (see Record a visit): group by `Context` frame or by cuisine instead; the cuisine calibration under Record a visit is the mechanism that actually changes the profile.
 
 Never change profile without explicit user confirmation.
 

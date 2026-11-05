@@ -30,7 +30,7 @@ In all cases, "low review count" is the bottom 25th percentile of comparable ven
 
 The candidate must ALSO have a strong editorial signal:
 - Mentioned in a trusted source (any [A] or [B] tier source per `source-confidence.md`)
-- OR cited in a chef interview / Eater / Infatuation hit list / local food critic
+- OR cited in a chef interview / a maintained Eater list that passes the freshness gate in SKILL.md / Infatuation hit list / local food critic
 - OR off-cache discovery from a deep search (a place that came up in research but was excluded from prior searches for axis mismatch)
 
 A "hidden" place with no editorial signal is just an unknown — that's not the goal.
@@ -58,7 +58,7 @@ In the output, the hidden gem slot is explicitly labeled:
 ## Hidden Gem (under-the-radar slot)
 
 ### 3. {Place with low review count + editorial signal}
-> ... · GM 4.2 (87 reviews) · **Sources:** [B] Eater Madrid 2025 — "untouched neighborhood gem"
+> ... · GM 4.2 (87 reviews) · **Sources:** [B] Madrid Secreto — "untouched neighborhood gem"
 > Hidden because: locals' lunchtime spot, no English menu, no reservations
 ```
 

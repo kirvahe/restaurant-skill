@@ -8,7 +8,7 @@ How to capture a visit so the resulting feedback log entry is rich enough to dri
 - Decimal scoring rule
 - Feedback-log entry template (date convention, `Company` and `Ordered`)
 - Context frames — what the number was measured against (+ provenance modifiers)
-- Calibration — tier definitions, drift detection (removed), format-specific anchor
+- Calibration — tier definitions, no drift scan or log-wide average (with old patterns), format-specific anchor
 - Cache correction discipline
 - When the user gives only a rating
 
@@ -55,7 +55,7 @@ The /10 scale gains decimal granularity on the top tier where editorial discrimi
 | 6.0–8.9 | integers OR .5 increments allowed (7, 7.5, 8) | Mid-tier doesn't reward false precision |
 | 1.0–5.9 | integers (rarely seen for visits the user actually completes) | — |
 
-Record the decimal the user gave; never round it for storage. (There is no log-wide average to feed — see "Drift detection — removed" below.)
+Record the decimal the user gave; never round it for storage. (There is no log-wide average to feed — see "No drift scan, no log-wide average" below.)
 
 ## Feedback-log entry template
 
@@ -76,7 +76,7 @@ Record the decimal the user gave; never round it for storage. (There is no log-w
 
 **Date convention.** The header carries two dates, because they are not the same thing and are easily conflated: `visited` is when the meal happened, `logged` is when it was written down. The gap can be years — a meal remembered from a long-ago trip and logged today. `visited` accepts a date (`YYYY-MM-DD`), a month (`YYYY-MM`), an approximation (`~YYYY-MM`), `ongoing (regular)` / `ongoing (N+ visits)` for places the user goes to repeatedly, or `unknown` when the date cannot be established. Write `unknown` rather than reusing the logging date — a guessed visit date silently corrupts any recency reasoning.
 
-**`Company` and `Ordered` were dropped in the v1.2 redesign and restored in v1.4.** That was a regression, not a simplification: `Company` decides which venues fit at all (couple vs a noisy six-person sharing dinner are different searches), and `Ordered` is what makes an entry reusable later — an entry is only useful a year on if it says which dish worked and which did not.
+**`Company` and `Ordered` are required, not optional detail:** `Company` decides which venues fit at all (couple vs a noisy six-person sharing dinner are different searches), and `Ordered` is what makes an entry reusable later — an entry is only useful a year on if it says which dish worked and which did not.
 
 The Pros/Cons fields from the older format are subsumed by Peak/Disconfirm. The Pros field tended to invite confirmation-biased lists; Peak forces a single specific moment which is more diagnostic.
 
@@ -118,7 +118,7 @@ Consequences for how the log is read:
 
 ## Calibration — tier definitions, not fixed places
 
-To prevent rating drift over years, tiers are defined by **observable behavior signals** the protocol fields already capture (peak / end / disconfirm / return). The previous mechanism — three fixed reference restaurants compared against every new rating — is replaced because it forced cross-format comparison (e.g., wine bar vs Basque grill) that was incoherent in practice and produced ratings the calibration ritual could not actually defend. Anchors also drift in memory themselves, importing a new drift problem to solve an old one.
+Tiers are defined by **observable behavior signals** the protocol fields already capture (peak / end / disconfirm / return), not by fixed reference restaurants: a fixed anchor forces cross-format comparison (a wine bar against a Basque grill) that cannot be defended, and anchors drift in memory themselves.
 
 ### Tier definitions
 
@@ -133,13 +133,9 @@ To prevent rating drift over years, tiers are defined by **observable behavior s
 
 The /10 number reads against these definitions. Decimal granularity on 9.0+ remains for editorial discrimination at the top tier.
 
-### Drift detection — removed in v1.4
+### No drift scan, no log-wide average
 
-There is no periodic drift scan, and this is deliberate.
-
-What replaces it: **nothing aggregate.** The `Context:` field makes each rating readable on its own terms, with no cross-year comparison required, and the cuisine calibration in `SKILL.md` is where an actual profile change gets proposed.
-
-**Do not re-introduce a log-wide average or a drift scan.** If drift ever genuinely needs measuring, do it inside one frame (`absolute` only) and name the frame.
+There is no periodic drift scan and no log-wide average, deliberately. The only input such a scan could use is a mean pooled across nine incompatible `Context` frames, and a drift observation has no action attached — the cuisine calibration in `SKILL.md` is the one mechanism that proposes a profile change and writes to a file. The `Context:` field makes each rating readable on its own terms, with no cross-year comparison required. If drift ever genuinely needs measuring, do it inside one frame (`absolute` only) and name the frame.
 
 #### Old patterns
 
@@ -161,7 +157,7 @@ Before assigning >=8 to a new entry in that format, scan the 3 most recent same-
 - Does this visit clear them on at least one dimension (peak, return-strength, craft)?
 - Or does it sit in the same band as a prior 7 that the user already labeled "solid, no spark"?
 
-For formats with <5 entries: skip this anchor check. Rely on the tier definitions above and the structured protocol fields. **Do NOT cross-format compare** (a new wine bar vs a Basque grill 8) — that was the previous mechanism's broken default.
+For formats with <5 entries: skip this anchor check. Rely on the tier definitions above and the structured protocol fields. Do not cross-format compare (a new wine bar vs a Basque grill 8).
 
 ## Cache correction discipline
 
