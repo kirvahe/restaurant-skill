@@ -44,7 +44,7 @@ The tier is informational, not blocking. A [C] candidate can still be recommende
 
 ### Guía Repsol — the award's origin matters more than the award
 
-Not all Soletes carry equal weight. The API exposes which route produced the award, so use it:
+Not all Soletes carry equal weight. The per-venue data does not say which route produced an award; query the `cocineros;all` and `famosos;all` filters to find out:
 
 | Route | Tier contribution |
 |---|---|
@@ -52,13 +52,13 @@ Not all Soletes carry equal weight. The API exposes which route produced the awa
 | Chef-sourced (`cocineros;` filter, or "Donde comen los cocineros") | Chef-cited → [A] on its own, same as a chef interview |
 | Celebrity-sourced (`famosos;` filter) | Does **not** count toward a tier. A celebrity Solete is a personal pick by a public figure, not an inspected award |
 
-Independent of route: an award is evidence the venue **was** judged good, not that it currently is. Soles are rarely revoked, and the 2025 edition made 400 visits against a 618-venue list. A Repsol award never substitutes for the open-status check.
+Independent of route: an award is evidence the venue **was** judged good, not that it currently is. Soles are rarely revoked, and an edition does not re-inspect every listed venue (figures in `guia-repsol.md` → Guardrails). A Repsol award never substitutes for the open-status check.
 
 ### Eater — a stale list is not an editorial source
 
 Eater only reaches [B] when both conditions hold: the city is one of the 9 Eater actually maintains as of July 2026 (Paris, London, Barcelona, Lisbon, Rome, Tokyo, Mexico City, Vancouver, Montreal), **and** the page passes the freshness gate — `article:modified_time` differs from `article:published_time` *and* is under ~12 months old.
 
-A page that fails either test contributes nothing — not [C], nothing. It is not a weak signal, it is an unverified one: 31 of Eater's 47 international lists have never been revisited since commission, and their publication dates make them look current when they are not. Treating a frozen list as a weak editorial vote is exactly how a venue that closed years ago enters a recommendation.
+A page that fails either test contributes nothing — not [C], nothing. It is not a weak signal, it is an unverified one: most of Eater's international lists have never been revisited since commission (dated counts in `worked-failures.md` → "Eater — dated coverage notes"), and their publication dates make them look current when they are not. Treating a frozen list as a weak editorial vote is exactly how a venue that closed years ago enters a recommendation.
 
 ## Tourist-bias annotation
 

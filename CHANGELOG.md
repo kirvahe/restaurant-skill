@@ -7,7 +7,7 @@ Note: entries for v0.9.0, v1.0, and v1.1 were backfilled retroactively on 2026-0
 
 ## [Unreleased]
 
-## [v1.4] — 2026-10-03
+## [v1.4] — 2026-11-05
 
 Adds new source rules, a richer visit protocol and stricter data-quality checks, and reorganises the skill along Anthropic's skill-authoring best practices. The reorganisation moves material between files; it does not change what the existing rules require.
 
@@ -36,11 +36,13 @@ Adds new source rules, a richer visit protocol and stricter data-quality checks,
 - Recording a revisit shows the prior entry (rating, axis, context frame, notes) before the new one is added.
 - Eater keeps the subdomain rule; every other staleness judgement goes through the freshness gate.
 - Onboarding block 5 asks about anti-patterns directly instead of pointing to a template file that is not installed with the skill.
-- Instructions no longer carry counts that go stale or narrate earlier versions; that history stays in the "Old patterns" block of `references/visit-protocol.md`.
+- Instructions no longer carry list or entry counts or narrate earlier versions; dated source figures live in `references/worked-failures.md` and the Guía Repsol guardrails, and version history in the "Old patterns" block of `references/visit-protocol.md`.
+- Guía Repsol award routes are ranked the same way in every file: chef-sourced strongest, inspector-awarded next, celebrity-sourced not counted.
+- Cuisine calibration averages ratings within one `Context` frame, not across frames.
+- Onboarding reference restaurants use the `visited` / `logged` date convention.
 - Version set to 1.4 in `SKILL.md`, `config.yml.example` and the README; the ROADMAP's next target is now v1.5.
 
 ### Fixed
-- In `references/guia-repsol.md`, the `poisMap` warning sat inside the bash code block; it is now regular text.
 - The hidden-gem example in `references/hidden-gems.md` cited an Eater list that the Eater rule excludes; it now cites a source the rules accept.
 - `SKILL.md` → Analyze pointed "below" for the cuisine calibration, which sits under Record a visit.
 

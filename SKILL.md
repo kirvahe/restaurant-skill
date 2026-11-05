@@ -286,7 +286,7 @@ A Solete or Sol counts as one of the 2+ independent validations required below, 
 - `modified == published` → the list was never revisited since commission
 - `modified` is more than ~12 months old → the edition has gone dormant
 
-The second test matters because the 9-city list below is a snapshot of July 2026 and will decay — an edition can be dropped at any time, and the city whitelist alone will not notice. A maintained list also states its own changes ("New to the map in April 2026: …"); the absence of such a note on a supposedly current list is a warning sign.
+The second test matters because the 9-city list above is a snapshot of July 2026 and will decay — an edition can be dropped at any time, and the city whitelist alone will not notice. A maintained list also states its own changes ("New to the map in April 2026: …"); the absence of such a note on a supposedly current list is a warning sign.
 
 **Access:** `mcp__firecrawl__firecrawl_scrape` on `https://{sub}.eater.com/maps` with `formats:["json"]` returns that US city's current 38 and heatmap in one call. For international cities, resolve through `https://www.eater.com/international-maps` or search — international slugs are not guessable. Check the final status after redirects; the `/eater-38` hub still links dead URLs that 301 into 404s.
 
@@ -397,7 +397,7 @@ A round transition happens when the user provides feedback on the current round'
 The `[A]` / `[B]` / `[C]` tier prefix on the Sources line is mandatory — see `references/source-confidence.md`. The tourist-bias inline annotation (e.g., "(842 — likely tourist-inflated, treat as ~4.0)") fires only in tourist-heavy zones; same reference file defines the trigger conditions.
 
 ### Rules:
-- **LANGUAGE = REQUEST LANGUAGE** — all chat prose, card text, inline ★ Insight blocks, and the saved recommendation `.md` are written in the user's request language (see LANGUAGE RULE at top). Internal cache files stay English. No mixing.
+- **Language** — as in the Language section at the top.
 - NO labels (strong pick / solid / speculative) — sorting does the job
 - NO comparisons to reference restaurants
 - NO italic (unreadable in terminal)
@@ -469,7 +469,7 @@ After recording:
 3. If 10/10 → suggest adding to taste-profile references
 
 ### Calibration (after every 5th visit, count >= 10):
-Scan ratings by cuisine and anti-pattern. If a cuisine has 3+ entries averaging 8+ but is below Top tier → propose promotion. If an anti-pattern has 3+ entries rated 6-7 → propose softening to "soft" filter. Present max 2 tweaks, one at a time: "[Current] → [Proposed]. Evidence: {places+ratings}. Apply? (y/n)". On yes → update taste-profile.md. On no → suppress that tweak for 10 more entries. No calibration below 10 entries. Full analysis at every 15th entry or on request.
+Scan ratings by cuisine and anti-pattern. If a cuisine has 3+ entries averaging 8+ within one `Context` frame (normally `absolute`) but is below Top tier → propose promotion. If an anti-pattern has 3+ entries rated 6-7 → propose softening to "soft" filter. Present max 2 tweaks, one at a time: "[Current] → [Proposed]. Evidence: {places+ratings}. Apply? (y/n)". On yes → update taste-profile.md. On no → suppress that tweak for 10 more entries. No calibration below 10 entries. Full analysis at every 15th entry or on request.
 
 ---
 

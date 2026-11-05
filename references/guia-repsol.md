@@ -310,8 +310,8 @@ Rural and roadside coverage is genuinely strong — verified Soletes in villages
 **1. An award means "was once judged good", not "is currently good."**
 Soles are rarely revoked except when a venue closes. Directo al Paladar (Mar 2025): the edition was built from **400 visits against a 618-venue list** — *"ni siquiera se han vuelto a visitar todos los establecimientos que aparecen en la guía"* — using 53 part-time inspectors. Michelin visits every listed restaurant at least once, up to eight times for three stars. Always confirm `schedule.businessStatus` from `GET /poi/{id}`.
 
-**2. Inspector- and chef-sourced Soletes outrank celebrity-sourced.**
-Celebrity Soletes are favourites named by public figures — a personal recommendation, not an inspection. Treat `famosos;` as the weakest dimension in the API, `cocineros;` as materially stronger, and standard inspector-awarded Soletes as stronger still.
+**2. Chef-sourced and inspector-awarded Soletes outrank celebrity-sourced.**
+Celebrity Soletes are favourites named by public figures — a personal recommendation, not an inspection. Treat `famosos;` as the weakest dimension in the API and chef-sourced Soletes (`cocineros;`) as the strongest — chef-cited, the same weight as a chef interview — with standard inspector-awarded Soletes in between.
 
 **3. Volume is not endorsement strength — the badge is a filter, not a ranking.**
 5,500+ Soletes and 808 soleados. Carlos Maribona (ABC) on the inflation: *"Un exceso que diluye la importancia de los galardonados. Poca gente conoce cuáles son los 42 restaurantes con tres soles."* Use the award to shortlist, then rank with the taste profile.

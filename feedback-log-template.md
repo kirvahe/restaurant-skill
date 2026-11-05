@@ -76,4 +76,4 @@ Tiers are defined by behaviour signals, not by fixed reference places. Full defi
 
 ### Why there is no average
 
-A log-wide average pools ratings given in different `Context` frames — a 7 meaning "disappointing for a starred place" and a 7 meaning "a pleasant surprise for a village" — so it cannot be read literally. If a number is ever needed, compute it within one frame and name the frame. Reasoning: `references/visit-protocol.md` → "Drift detection — removed".
+A log-wide average pools ratings given in different `Context` frames — a 7 meaning "disappointing for a starred place" and a 7 meaning "a pleasant surprise for a village" — so it cannot be read literally. If a number is ever needed, compute it within one frame and name the frame. Reasoning: `references/visit-protocol.md` → "No drift scan, no log-wide average".

@@ -25,7 +25,7 @@ Ask questions in **blocks (batched)**, not one by one. User answers in free text
 | 3 | No | Food philosophy | Product vs concept, returnability, sharing plates, seasonality | Update Taste Compass |
 | 4 | No | Atmosphere & drinks | Room type, design, wine, cocktails, coffee, service style | Update Atmosphere/Wine/Cocktails/Coffee/Service |
 | 5 | No | Anti-patterns | Ask which formats, service styles and rooms reliably disappoint (e.g. tasting-menu-only, formal ceremony, corporate chains, tourist-strip locations) and for one concrete disappointing experience | Update Anti-patterns |
-| 6 | **Yes** | Reference restaurants | 5-10 loved places (name, city, cuisine, /10, why). 2-3 disappointing places (what went wrong) | Update References. Add all to feedback-log.md (use "--" for unknown fields, approximate date or "--" for Date, "(historical)" in Notes) |
+| 6 | **Yes** | Reference restaurants | 5-10 loved places (name, city, cuisine, /10, why). 2-3 disappointing places (what went wrong) | Update References. Add all to feedback-log.md (use "--" for unknown fields; `visited` approximate (`~YYYY-MM`) or `unknown`, `logged` today; "(historical)" in Notes) |
 | 7 | No | Ritual & sources | Evening format, booking style, travel distance, new vs familiar, seasonality, trusted/distrusted sources | Read local-critics.md for home country. Update Evening ritual + Sources |
 
 ## Before Block 6
